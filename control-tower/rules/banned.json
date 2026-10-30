@@ -1,0 +1,121 @@
+{
+  "alwaysBanned": [
+    {
+      "id": "discount",
+      "pattern": "\\b(discount|coupon|% ?off|\\$\\d+ ?off|courtesy price|groupon|promo code|special offer)\\b",
+      "why": "No offers unless the Facts doc lists them as APPROVED"
+    },
+    {
+      "id": "free",
+      "pattern": "\\bfree\\b(?! of charge to report)",
+      "why": "Free services or inspections are not approved"
+    },
+    {
+      "id": "superlative",
+      "pattern": "\\b(#\\s?1|number one|the best|best in|premier|the only shop|dealer-level|without dealership prices)\\b",
+      "why": "Superlatives and price comparisons are not approved"
+    },
+    {
+      "id": "towing",
+      "pattern": "\\b(tow(ing)?|roadside|mobile service|loaner|rental car|net terms|credit line)\\b",
+      "why": "Towing, mobile service, loaners and credit are not approved"
+    },
+    {
+      "id": "turnaround",
+      "pattern": "\\b(same[- ]day turnaround|done in \\d+ (hours|days)|while you wait)\\b",
+      "why": "Turnaround promises are not approved"
+    },
+    {
+      "id": "dead-handle",
+      "pattern": "@prestige\\.maxx",
+      "why": "Dead TikTok handle; use @prestige.oakland"
+    },
+    {
+      "id": "aaa",
+      "pattern": "\\bAAA[- ]approved\\b",
+      "why": "Not verified"
+    },
+    {
+      "id": "weather-framing",
+      "pattern": "\\b(hurricane|storm|flood) (season|alert|warning) (special|campaign|offer)\\b",
+      "why": "Weather framing is not approved"
+    },
+    {
+      "id": "ai-photos",
+      "pattern": "\\b(generate|AI[- ]generated|higgsfield|midjourney) (photo|image|video)s?\\b",
+      "why": "Real photos and footage only"
+    },
+    {
+      "id": "pii-in-prompt",
+      "pattern": "\\b\\d{3}[- .]\\d{3}[- .]\\d{4}\\b(?!.*(954\\) 303-0758|954\\) 562-8045))",
+      "why": "Customer or candidate phone numbers do not belong in prompts",
+      "severity": "warn"
+    }
+  ],
+  "napCheck": {
+    "oaklandParkPhone": "(954) 303-0758",
+    "fortLauderdalePhone": "(954) 562-8045",
+    "wrongPairs": [
+      {
+        "pattern": "Fort Lauderdale[^.\\n]{0,80}303-0758",
+        "why": "Fort Lauderdale phone is (954) 562-8045"
+      },
+      {
+        "pattern": "Oakland Park[^.\\n]{0,80}562-8045",
+        "why": "Oakland Park phone is (954) 303-0758"
+      },
+      {
+        "pattern": "both shops (are )?open 7 days|open 7 days[^.\\n]{0,40}Fort Lauderdale",
+        "why": "Fort Lauderdale is closed Sunday"
+      }
+    ]
+  },
+  "laneOnly": [
+    {
+      "lane": "master",
+      "pattern": "\\b(create_trigger|update_trigger|fire_trigger|delete_trigger)\\b|\\b(enable|disable|pause|re-?enable) (a |the |other |any )?[\\w'-]*\\s?(task|trigger|scheduled task)s?\\b",
+      "why": "Only the Master Agent manages scheduled tasks"
+    },
+    {
+      "lane": "reviews",
+      "pattern": "\\b(reply|respond) to (every |new |the )?(google |yelp )?reviews?\\b",
+      "why": "Only Review Defense replies to reviews"
+    },
+    {
+      "lane": "customer-leads",
+      "pattern": "\\b(text|email|message|call) (the )?customers?\\b",
+      "why": "Only Lead Fast Responder messages customers"
+    },
+    {
+      "lane": "b2b",
+      "pattern": "\\b(cold[- ]email|email (the )?prospects?)\\b",
+      "why": "Only B2B Prospecting Engine emails prospects"
+    },
+    {
+      "lane": "website",
+      "pattern": "\\b(edit|publish|update) (the )?(website|wordpress|page|schema|llms\\.txt)\\b",
+      "why": "Only Search Everywhere Chief edits the website"
+    },
+    {
+      "lane": "ads",
+      "pattern": "\\b(add|pause|remove) (negative )?keywords?|raise bids?|change (the )?budget\\b",
+      "why": "Only Growth Autopilot touches Google Ads, never budgets or bids"
+    },
+    {
+      "lane": "video",
+      "pattern": "\\b(post|publish|schedule) (a |the )?videos?\\b",
+      "why": "Only Video Studio publishes video"
+    }
+  ],
+  "routineEmail": {
+    "pattern": "\\b(send|email) (the )?(owner|max|prestige@prestige\\.tires)\\b(?![^.\\n]*URGENT)",
+    "why": "Routine owner emails are forbidden; append a ledger event instead. Only URGENT emails allowed."
+  },
+  "pricesOutsideReplies": {
+    "pattern": "\\$\\s?\\d{2,4}(\\.\\d{2})?\\b",
+    "allowedLanes": [
+      "customer-leads"
+    ],
+    "why": "Prices only in direct replies to customers who asked"
+  }
+}

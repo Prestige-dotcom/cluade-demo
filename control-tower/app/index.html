@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prestige Control Tower</title>
+<style>
+  :root { --bg:#0f1216; --card:#171c23; --text:#e8ecf1; --muted:#95a0ad; --ok:#38b26f; --warn:#e3a72f; --bad:#e2574c; --line:#273040; }
+  @media (prefers-color-scheme: light) { :root { --bg:#f5f7fa; --card:#fff; --text:#141a21; --muted:#5b6673; --line:#dde3ea; } }
+  * { box-sizing:border-box }
+  body { margin:0; background:var(--bg); color:var(--text); font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif; padding:16px }
+  h1 { font-size:20px; margin:0 0 4px } .sub { color:var(--muted); margin:0 0 16px; font-size:13px }
+  .tiles { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; margin-bottom:16px }
+  .tile { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px }
+  .tile b { display:block; font-size:24px } .tile span { color:var(--muted); font-size:12px }
+  .filters { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px }
+  .filters button { background:var(--card); color:var(--text); border:1px solid var(--line); border-radius:999px; padding:6px 12px; font-size:13px }
+  .filters button.on { border-color:var(--text) }
+  .cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:10px }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px; display:flex; flex-direction:column; gap:6px }
+  .card h3 { margin:0; font-size:15px } .meta { color:var(--muted); font-size:12px }
+  .dot { display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:6px; vertical-align:middle }
+  .ok{background:var(--ok)} .warn{background:var(--warn)} .bad{background:var(--bad)} .off{background:var(--muted)}
+  .flags { font-size:12px; color:var(--warn) } .flags.bad { color:var(--bad) }
+  .pill { font-size:11px; border:1px solid var(--line); border-radius:999px; padding:1px 7px; color:var(--muted); margin-right:4px }
+  section h2 { font-size:16px; margin:20px 0 8px }
+  ul.findings { margin:0; padding-left:18px; font-size:13px } ul.findings li { margin-bottom:4px }
+</style>
+</head>
+<body>
+<h1>Prestige Control Tower · Agents</h1>
+<p class="sub">Static preview reading <code>registry/agents.json</code>. In production this screen reads the <code>agents</code>, <code>agent_runs</code> and <code>events</code> tables and lets you pause, resume, re-run and open prompts.</p>
+<div class="tiles" id="tiles"></div>
+<div class="filters" id="filters"></div>
+<div class="cards" id="cards"></div>
+<section><h2>Roster findings</h2><ul class="findings" id="findings"></ul></section>
+<script>
+const EXPENSIVE = new Set(['claude-opus-5-5']);
+const isHourly = s => /^\S+ \* \* \* \*/.test(s||'') || /^\S+ \d+-\d+ \* \* /.test(s||'');
+let agents = [], filter = 'enabled';
+function health(a){
+  if (a.retired) return ['off','retired'];
+  if (!a.enabled) return ['off', a.suspended ? 'suspended: '+a.suspended : 'paused'];
+  const s = a.lastRun?.status;
+  if (s==='FAILED'||s==='ABANDONED') return ['bad', s.toLowerCase()+(a.lastRun.reason?' · '+a.lastRun.reason:'')];
+  if (a.needsMac && !a.requireDevice) return ['warn','needs Mac, not bound'];
+  if (s==='never') return ['warn','never ran'];
+  return ['ok', s? s.toLowerCase() : 'ok'];
+}
+function render(){
+  const live = agents.filter(a=>!a.retired);
+  const enabled = live.filter(a=>a.enabled);
+  const tiles = [
+    ['Agents', live.length, 'live tasks'], ['Enabled', enabled.length, 'cap 35'],
+    ['Failing', enabled.filter(a=>['FAILED','ABANDONED'].includes(a.lastRun?.status)).length, 'enabled, last run bad'],
+    ['Need Mac', enabled.filter(a=>a.needsMac).length, enabled.filter(a=>a.needsMac&&!a.requireDevice).length+' not bound'],
+    ['Opus', enabled.filter(a=>EXPENSIVE.has(a.model)).length, enabled.filter(a=>EXPENSIVE.has(a.model)&&isHourly(a.schedule)).length+' hourly'],
+    ['Paused loaded', live.filter(a=>!a.enabled&&a.riskFlags?.length).length, 'rule-breaking prompts'],
+  ];
+  tiles.push(['Duplicates', live.filter(a=>a.duplicateOf).length, 'declared']);
+  document.getElementById('tiles').innerHTML = tiles.map(([k,v,s])=>`<div class="tile"><b>${v}</b>${k}<br><span>${s}</span></div>`).join('');
+  const fs = [['enabled','Enabled'],['failing','Failing'],['mac','Needs Mac'],['paused','Paused'],['all','All']];
+  document.getElementById('filters').innerHTML = fs.map(([k,l])=>`<button class="${filter===k?'on':''}" onclick="filter='${k}';render()">${l}</button>`).join('');
+  const list = agents.filter(a => filter==='all' ? true : filter==='enabled' ? a.enabled && !a.retired : filter==='paused' ? !a.enabled && !a.retired : filter==='mac' ? a.needsMac && a.enabled : ['FAILED','ABANDONED'].includes(a.lastRun?.status) && a.enabled);
+  document.getElementById('cards').innerHTML = list.map(a=>{ const [h,label]=health(a); return `
+    <div class="card">
+      <h3><span class="dot ${h}"></span>${a.name}</h3>
+      <div class="meta">${label} · lane <b>${a.lane}</b> · ${a.schedule||''} · ${a.model||'default'}</div>
+      <div>${a.needsMac?'<span class="pill">Mac</span>':''}${a.mayMessageCustomers?'<span class="pill">messages customers</span>':''}${a.mayEditSite?'<span class="pill">edits site</span>':''}${a.mayEditAds?'<span class="pill">edits ads</span>':''}${a.mayReplyReviews?'<span class="pill">replies reviews</span>':''}${a.mayManageTasks?'<span class="pill">manages tasks</span>':''}${a.duplicateOf?'<span class="pill">duplicate</span>':''}</div>
+      ${a.riskFlags?.length?`<div class="flags ${a.enabled?'':'bad'}">${a.riskFlags.join(' · ')}</div>`:''}
+      <div class="meta">${a.id}</div>
+    </div>`}).join('');
+  const f = [];
+  for (const a of live) if (a.duplicateOf) f.push(`${a.name} duplicates ${a.duplicateOf}${a.enabled?' and is enabled':''}`);
+  const byLane = {}; for (const a of enabled) if (a.acts) (byLane[a.lane] ||= []).push(a.name);
+  for (const [l,n] of Object.entries(byLane)) if (n.length>1) f.push(`${n.length} enabled acting agents in lane ${l}: ${n.join(' | ')}`);
+  for (const a of enabled) if (isHourly(a.schedule)&&EXPENSIVE.has(a.model)) f.push(`${a.name} runs hourly on ${a.model}`);
+  document.getElementById('findings').innerHTML = f.map(x=>`<li>${x}</li>`).join('') || '<li>none</li>';
+}
+fetch('../registry/agents.json').then(r=>r.json()).then(j=>{agents=j.agents;render();}).catch(()=>{document.getElementById('cards').textContent='Serve this folder over HTTP (npx serve ..) so the registry can load.';});
+</script>
+</body>
+</html>

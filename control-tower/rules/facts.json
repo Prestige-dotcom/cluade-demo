@@ -1,0 +1,114 @@
+{
+  "version": "2026-10-30",
+  "business": {
+    "publicName": "Prestige Auto Repairs & Tires",
+    "altName": "Prestige MaXX",
+    "owner": { "name": "Majid \"Max\" Mukhtar", "signCustomers": "Max", "signCandidates": "Majid" },
+    "email": "prestige@prestige.tires",
+    "website": "https://prestige.tires",
+    "estimateUrl": "https://prestige.tires/get-estimate/",
+    "warrantyUrl": "https://prestige.tires/warranty/",
+    "businessStarted": "2025-08-08",
+    "social": {
+      "tiktok": "https://www.tiktok.com/@prestige.oakland",
+      "instagram": "https://www.instagram.com/prestigeoakland",
+      "facebook": "https://www.facebook.com/people/Prestige-auto-repairs-tires-Oakland-park/61582970965207/"
+    },
+    "deadHandles": ["@prestige.maxx"]
+  },
+  "shops": [
+    {
+      "id": "oakland-park",
+      "name": "Oakland Park",
+      "address": "250 NE 44th St, Oakland Park, FL 33334",
+      "phone": "(954) 303-0758",
+      "hours": "Open 7 days, 8 AM to 7 PM",
+      "afterHoursDropBox": true,
+      "reviewLink": "https://search.google.com/local/writereview?placeid=ChIJk2QJTqED2YgR0CcwSWL_Rsc"
+    },
+    {
+      "id": "fort-lauderdale",
+      "name": "Fort Lauderdale",
+      "address": "930 NE 4th Ave, Fort Lauderdale, FL 33304",
+      "phone": "(954) 562-8045",
+      "hours": "Monday to Saturday, 8 AM to 7 PM, closed Sunday",
+      "afterHoursDropBox": false,
+      "reviewLink": "https://search.google.com/local/writereview?placeid=ChIJ4dei570B2YgRB-DUe1AllUE"
+    }
+  ],
+  "approvedClaims": [
+    "ASE-certified, factory-trained technicians",
+    "2-year/24,000-mile warranty on repairs",
+    "RepairPal Certified",
+    "Fleet accounts: priority scheduling and consolidated account billing",
+    "Photo inspections and written estimates before any work",
+    "Concierge vehicle pickup and delivery (call the shop to schedule; no fees, limits or times quoted)",
+    "After-hours drop-off at Oakland Park only",
+    "English and Spanish"
+  ],
+  "pricesDirectRepliesOnly": {
+    "laborPerHour": 150,
+    "oilChange": { "conventional": 69.88, "syntheticBlend": 89.88, "fullSynthetic": 99.88, "euroSynthetic": 120.88, "extraQuart": 26 },
+    "ownerConfirmationPending": "Backlog #60"
+  },
+  "notApproved": [
+    "discounts, coupons, % off, courtesy prices, free inspection or service, Groupon",
+    "towing, mobile or roadside service, loaner cars, net terms or credit lines",
+    "turnaround-time promises, appointment times not confirmed by staff",
+    "AAA Approved, insurer DRP membership (until verified)",
+    "superlatives as fact: #1, best, premier, the only shop you should trust",
+    "invented customers, jobs, reviews, awards or statistics",
+    "AI-generated photos or scenes",
+    "weather, flood or storm news framing",
+    "dealer-level or dealership price comparisons"
+  ],
+  "notUs": [
+    "Prestige shops in Hollywood, Hallandale Beach and Greenacres",
+    "PRESTIGE AUTO REPAIRS & TIRES LLC (Hollywood, Sunbiz L24000145758)",
+    "Prestige European Auto Services (711 W Broward Blvd)",
+    "Prestige Autowerks",
+    "old location 1050 W Commercial Blvd Ste 3 (closed)"
+  ],
+  "gbpPostRule": "Never put a phone number, email or web address in GBP post text; only in the CTA button. Each profile names only its own city.",
+  "lanes": {
+    "master": { "owner": "MASTER AGENT", "onlyOneThat": "changes other tasks' prompts or creates tasks" },
+    "watchdog": { "owner": "HOURLY WATCHDOG", "scope": "technical health only, no prompt edits" },
+    "customer-leads": { "owner": "LEAD FAST RESPONDER", "onlyOneThat": "messages customers about service" },
+    "b2b": { "owner": "B2B PROSPECTING ENGINE", "onlyOneThat": "emails prospects" },
+    "hiring": { "owner": "HIRING AUTOPILOT", "onlyOneThat": "messages candidates" },
+    "hiring-posts": { "owner": "HIRING POSTS" },
+    "website": { "owner": "SEARCH EVERYWHERE CHIEF", "onlyOneThat": "edits the website, schema, llms.txt" },
+    "ads": { "owner": "GROWTH AUTOPILOT", "scope": "Google Ads + LSA; never budgets, bids, strategy or status" },
+    "listings": { "owner": "DAILY SEO & CALLS" },
+    "backlinks": { "owner": "BACKLINK BUILDER", "scope": "drafts only" },
+    "gbp-oakland-park": { "owner": "YEXT POST" },
+    "gbp-fort-lauderdale": { "owner": "CONTENT QUEUE", "scope": "drafts for the owner to post" },
+    "social": { "owner": "CAMPAIGN ENGINE", "scope": "photo and text posts, no video" },
+    "video": { "owner": "VIDEO STUDIO", "onlyOneThat": "makes or publishes videos" },
+    "tiktok": { "owner": "TIKTOK GROWTH", "scope": "photo carousels, max 2 a day" },
+    "reviews": { "owner": "REVIEW DEFENSE", "onlyOneThat": "replies to reviews" },
+    "review-requests": { "owner": "REVIEW REQUESTS", "scope": "drafts only" },
+    "win-back": { "owner": "WIN-BACK", "scope": "drafts only" },
+    "violations": { "owner": "VIOLATIONS GUARD" },
+    "qa": { "owner": "NIGHTLY AUDIT", "scope": "QA of today's changes only" },
+    "scoreboard": { "owner": "SCOREBOARD" },
+    "compliance": { "owner": "LEGAL & COMPLIANCE" },
+    "finance": { "owner": "8 AM INBOX SCAN" },
+    "inbox": { "owner": "INBOX TRIAGE" },
+    "watch": { "owner": "DAILY WATCH" },
+    "lead-hunter": { "owner": "LOCAL LEAD HUNTER" },
+    "news-ideas": { "owner": "NEWS POST IDEAS" }
+  },
+  "reporting": {
+    "sheetId": "1-6mE3FXPuYuo5pNO3H8LolZln-fN-Bw6D2zAOxhZy54",
+    "backlogSheetId": "1BUuS8dzFGua9Q563AjY6gXc7HNm_6RqNASjd6RFlkEg",
+    "urgentEmailOnly": ["money at risk", "account suspension or security", "a real customer waiting with no reply", "legal deadline within 7 days"],
+    "quietHoursET": "9 PM to 7 AM"
+  },
+  "docs": {
+    "coreFacts": "193-WRcNvJuLhbZPbhgbU8oovibJ563s5Z6Z854Yjdgs",
+    "approvedFacts": "1adWsUfarPcbEWuXE_snSrK9axZXv_u_R_q0Q_cud8E8",
+    "searchEverywherePlaybook": "1THg1BHkXPYuxFjJ6MBh9PByoDhm9S3VC7epF2eWqdsk",
+    "nightlyAuditLog": "1JOT0bn2WUKM2Iqfs4JY006n_04k5kaADlZRJv80YZxk"
+  }
+}

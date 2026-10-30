@@ -1,0 +1,17 @@
+{
+  "name": "prestige-control-tower",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Prestige Control Tower: spec, data model, agent registry, prompt compiler and linter, roster health check.",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "roster": "node scripts/roster-check.mjs",
+    "lint-prompt": "node scripts/lint-prompt.mjs",
+    "compile-prompt": "node scripts/compile-prompt.mjs",
+    "verify": "npm test && node scripts/roster-check.mjs > /dev/null && node scripts/lint-prompt.mjs examples/lead-body.md --lane customer-leads"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
