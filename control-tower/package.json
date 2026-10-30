@@ -9,7 +9,8 @@
     "roster": "node scripts/roster-check.mjs",
     "lint-prompt": "node scripts/lint-prompt.mjs",
     "compile-prompt": "node scripts/compile-prompt.mjs",
-    "verify": "npm test && node scripts/roster-check.mjs > /dev/null && node scripts/lint-prompt.mjs examples/lead-body.md --lane customer-leads"
+    "verify": "npm test && node scripts/roster-check.mjs > /dev/null && node scripts/build-plan.mjs && node scripts/lint-prompt.mjs examples/lead-body.md --lane customer-leads",
+    "plan": "node scripts/build-plan.mjs"
   },
   "engines": {
     "node": ">=20"

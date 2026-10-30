@@ -5,79 +5,113 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Prestige Control Tower</title>
 <style>
-  :root { --bg:#0f1216; --card:#171c23; --text:#e8ecf1; --muted:#95a0ad; --ok:#38b26f; --warn:#e3a72f; --bad:#e2574c; --line:#273040; }
-  @media (prefers-color-scheme: light) { :root { --bg:#f5f7fa; --card:#fff; --text:#141a21; --muted:#5b6673; --line:#dde3ea; } }
+  :root { --bg:#0f1216; --card:#171c23; --text:#e8ecf1; --muted:#95a0ad; --ok:#38b26f; --warn:#e3a72f; --bad:#e2574c; --line:#273040; --accent:#4f8cff }
+  @media (prefers-color-scheme: light) { :root { --bg:#f5f7fa; --card:#fff; --text:#141a21; --muted:#5b6673; --line:#dde3ea } }
   * { box-sizing:border-box }
-  body { margin:0; background:var(--bg); color:var(--text); font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif; padding:16px }
-  h1 { font-size:20px; margin:0 0 4px } .sub { color:var(--muted); margin:0 0 16px; font-size:13px }
-  .tiles { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; margin-bottom:16px }
-  .tile { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px }
-  .tile b { display:block; font-size:24px } .tile span { color:var(--muted); font-size:12px }
-  .filters { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px }
-  .filters button { background:var(--card); color:var(--text); border:1px solid var(--line); border-radius:999px; padding:6px 12px; font-size:13px }
-  .filters button.on { border-color:var(--text) }
+  body { margin:0; background:var(--bg); color:var(--text); font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif; padding:16px; padding-bottom:80px }
+  h1 { font-size:20px; margin:0 0 4px } .sub { color:var(--muted); margin:0 0 14px; font-size:13px }
+  nav { position:fixed; bottom:0; left:0; right:0; display:flex; background:var(--card); border-top:1px solid var(--line) }
+  nav button { flex:1; background:none; border:0; color:var(--muted); padding:12px 4px; font-size:12px } nav button.on { color:var(--accent); font-weight:600 }
+  .tiles { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px; margin-bottom:14px }
+  .tile { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px } .tile b { display:block; font-size:22px } .tile span { color:var(--muted); font-size:12px }
+  .filters { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px } .filters button { background:var(--card); color:var(--text); border:1px solid var(--line); border-radius:999px; padding:6px 12px; font-size:13px } .filters button.on { border-color:var(--text) }
   .cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:10px }
-  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px; display:flex; flex-direction:column; gap:6px }
-  .card h3 { margin:0; font-size:15px } .meta { color:var(--muted); font-size:12px }
-  .dot { display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:6px; vertical-align:middle }
-  .ok{background:var(--ok)} .warn{background:var(--warn)} .bad{background:var(--bad)} .off{background:var(--muted)}
+  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px; display:flex; flex-direction:column; gap:6px } .card h3 { margin:0; font-size:15px } .meta { color:var(--muted); font-size:12px }
+  .dot { display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:6px; vertical-align:middle } .ok{background:var(--ok)} .warn{background:var(--warn)} .bad{background:var(--bad)} .off{background:var(--muted)}
   .flags { font-size:12px; color:var(--warn) } .flags.bad { color:var(--bad) }
   .pill { font-size:11px; border:1px solid var(--line); border-radius:999px; padding:1px 7px; color:var(--muted); margin-right:4px }
-  section h2 { font-size:16px; margin:20px 0 8px }
-  ul.findings { margin:0; padding-left:18px; font-size:13px } ul.findings li { margin-bottom:4px }
+  table { width:100%; border-collapse:collapse; font-size:13px } th,td { text-align:left; padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:top } th { color:var(--muted); font-weight:600 }
+  details { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:10px 12px; margin-bottom:8px } summary { cursor:pointer; font-weight:600 }
+  ul { margin:6px 0; padding-left:18px } li { margin-bottom:3px }
+  .hidden { display:none }
 </style>
 </head>
 <body>
-<h1>Prestige Control Tower · Agents</h1>
-<p class="sub">Static preview reading <code>registry/agents.json</code>. In production this screen reads the <code>agents</code>, <code>agent_runs</code> and <code>events</code> tables and lets you pause, resume, re-run and open prompts.</p>
-<div class="tiles" id="tiles"></div>
-<div class="filters" id="filters"></div>
-<div class="cards" id="cards"></div>
-<section><h2>Roster findings</h2><ul class="findings" id="findings"></ul></section>
+<h1>Prestige Control Tower</h1>
+<p class="sub" id="sub">Static preview. Production reads the D1 tables; this reads registry/agents.json, keywords/master.json and plan/plan.json.</p>
+<section id="view"></section>
+<nav>
+  <button data-v="today">Today</button><button data-v="keywords">Keywords</button><button data-v="plan">Plan</button><button data-v="gbp">GBP</button><button data-v="agents">Agents</button>
+</nav>
 <script>
 const EXPENSIVE = new Set(['claude-opus-5-5']);
 const isHourly = s => /^\S+ \* \* \* \*/.test(s||'') || /^\S+ \d+-\d+ \* \* /.test(s||'');
-let agents = [], filter = 'enabled';
-function health(a){
-  if (a.retired) return ['off','retired'];
-  if (!a.enabled) return ['off', a.suspended ? 'suspended: '+a.suspended : 'paused'];
-  const s = a.lastRun?.status;
-  if (s==='FAILED'||s==='ABANDONED') return ['bad', s.toLowerCase()+(a.lastRun.reason?' · '+a.lastRun.reason:'')];
-  if (a.needsMac && !a.requireDevice) return ['warn','needs Mac, not bound'];
-  if (s==='never') return ['warn','never ran'];
-  return ['ok', s? s.toLowerCase() : 'ok'];
+let data = { agents: [], keywords: null, plan: null }, view = 'today', agentFilter = 'enabled', kwTier = 'A';
+const $ = id => document.getElementById(id);
+function health(a){ if (a.retired) return ['off','retired']; if (!a.enabled) return ['off', a.suspended?'suspended: '+a.suspended:'paused']; const s=a.lastRun?.status; if (s==='FAILED'||s==='ABANDONED') return ['bad', s.toLowerCase()+(a.lastRun.reason?' · '+a.lastRun.reason:'')]; if (a.needsMac&&!a.requireDevice) return ['warn','needs Mac, not bound']; if (s==='never') return ['warn','never ran']; return ['ok', s?s.toLowerCase():'ok']; }
+function esc(s){ return String(s??'').replace(/[&<>]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+
+function renderToday(){
+  const a = data.agents.filter(x=>!x.retired), en = a.filter(x=>x.enabled);
+  const kw = data.keywords?.keywords||[], plan = data.plan;
+  const tiles = [
+    ['Attack keywords', kw.filter(k=>k.tier==='A').length, 'low competition, own in 90 days'],
+    ['Maps keywords', kw.filter(k=>k.tier==='B').length, 'won in GBP + LSA'],
+    ['AI prompts', data.keywords?.aiPrompts?.length||0, 'tracked weekly, 4 engines'],
+    ['Pages in plan', plan?.siteChanges?.create?.length||0, 'first live: '+(plan?.calendar?.[0]?.date||'')],
+    ['Agents enabled', en.length, 'cap 35'],
+    ['Agents failing', en.filter(x=>['FAILED','ABANDONED'].includes(x.lastRun?.status)).length, 'enabled, last run bad'],
+  ];
+  const actions = [
+    ['Nov 1','Quo: finish identity verification and Renew, or pick a replacement line'],
+    ['Nov 1','Chargeback 2626001286: upload evidence'],
+    ['Now','Call Will Elmsebli at Agero (tow-in referrals)'],
+    ['Now','OpenSEO: connect Search Console + GA4; add credits (about $15/month covers daily rank tracking on 50 keywords)'],
+    ['Now','Google: add main account as owner of Fort Lauderdale profile; report "BMW Coding & Diagnostic Services" at 930 NE 4th Ave'],
+    ['Now','Mac: Require this computer on Yelp, TikTok, Yext, Video Studio, Growth Autopilot, Review Defense, Violations Guard; one Chrome'],
+    ['Tonight','Mitchell 1: export customers, vehicles, closed ROs to Content Inbox'],
+    ['This week','Shoot 20 real photos per shop; apply the GBP kit to both profiles'],
+    ['This week','Confirm or stop the oil-change prices Lead Fast Responder quotes'],
+    ['This week','Announce WordPress → static cut-over'],
+  ];
+  return `<div class="tiles">${tiles.map(([k,v,s])=>`<div class="tile"><b>${v}</b>${k}<br><span>${s}</span></div>`).join('')}</div>
+  <h2 style="font-size:16px">Owner actions</h2><table><tr><th>Due</th><th>Action</th></tr>${actions.map(([d,t])=>`<tr><td>${d}</td><td>${esc(t)}</td></tr>`).join('')}</table>`;
+}
+function renderKeywords(){
+  const kw = (data.keywords?.keywords||[]).filter(k=>k.tier===kwTier);
+  const tiers = [['A','Attack (low competition)'],['B','High volume / Maps'],['C','Local']];
+  return `<div class="filters">${tiers.map(([t,l])=>`<button class="${kwTier===t?'on':''}" onclick="kwTier='${t}';render()">${l}</button>`).join('')}</div>
+  <p class="meta">${esc(data.keywords?.tiers?.[kwTier]||'')}</p>
+  <table><tr><th>Keyword</th><th>Vol/mo</th><th>KD</th><th>Comp</th><th>CPC</th><th>Arena</th><th>Target</th></tr>
+  ${kw.map(k=>`<tr><td><b>${esc(k.kw)}</b>${k.es?`<br><span class="meta">ES: ${esc(k.es)}</span>`:''}</td><td>${k.vol??'—'}</td><td>${k.kd??'—'}</td><td>${k.comp??'—'}</td><td>${k.cpc?'$'+k.cpc:'—'}</td><td><span class="pill">${k.arena}</span></td><td class="meta">${esc(k.page||k.gbp||'')}</td></tr>`).join('')}</table>
+  <h2 style="font-size:16px;margin-top:18px">AI prompts (${data.keywords?.aiPrompts?.length||0})</h2><ul>${(data.keywords?.aiPrompts||[]).map(p=>`<li>${esc(p)}</li>`).join('')}</ul>`;
+}
+function renderPlan(){
+  const cal = data.plan?.calendar||[];
+  return `<p class="meta">One attack keyword per weekday from Nov 3. Each item is a page or article with schema, real media, Spanish twin, GBP service and backlink asset. Generated by scripts/build-plan.mjs.</p>
+  ${cal.map(c=>`<details><summary>${c.order}. ${c.date} · ${esc(c.keyword)} <span class="pill">${c.arena}</span></summary>
+    <div class="meta">${esc(c.url||'GBP/LSA only')}</div><p><b>${esc(c.title)}</b></p>
+    <ul><li>${esc(c.answerFirst)}</li><li>Sections: ${esc(c.sections.join('; '))}</li><li>Schema: ${esc(c.schema.join(', '))}</li><li>${esc(c.media)}</li><li>Links: ${esc(c.internalLinks.join(', '))}</li><li>${esc(c.spanish)}</li>${c.gbp?`<li>GBP: ${esc(c.gbp)}</li>`:''}${c.backlink?`<li>Backlink: ${esc(c.backlink)}</li>`:''}</ul></details>`).join('')}
+  <h2 style="font-size:16px;margin-top:18px">Backlink assets</h2>${(data.plan?.backlinks||[]).map(b=>`<details><summary>${esc(b.asset)}</summary><ul>${b.keywords.map(k=>`<li>${esc(k)}</li>`).join('')}</ul></details>`).join('')}
+  <h2 style="font-size:16px;margin-top:18px">Standing link targets</h2><ul>${(data.plan?.standingTargets||[]).map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`;
+}
+function renderGbp(){
+  return (data.plan?.gbpKit||[]).map(s=>`<details open><summary>${esc(s.shop)} · ${esc(s.hours)}</summary>
+    <p class="meta">${esc(s.address)} · ${esc(s.phone)}</p>
+    <p><b>Primary:</b> ${esc(s.primaryCategory)}<br><b>Additional:</b> ${esc(s.additionalCategories.join('; '))}</p>
+    <p><b>Description</b><br>${esc(s.description)}</p>
+    <details><summary>Services (${s.services.length})</summary><ul>${s.services.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></details>
+    <details><summary>Owner Q&amp;A (${s.qa.length})</summary><ul>${s.qa.map(x=>`<li><b>${esc(x.q)}</b><br>${esc(x.a)}</li>`).join('')}</ul></details>
+    <p class="meta">Posts: ${esc(s.postThemes.join(' · '))}<br>Rule: ${esc(s.postRule)}<br>Photos: ${esc(s.photoQuota)}<br>Booking: ${esc(s.bookingLink)}<br>Review link: ${esc(s.reviewLink)}</p></details>`).join('');
+}
+function renderAgents(){
+  const live = data.agents.filter(a=>!a.retired), enabled = live.filter(a=>a.enabled);
+  const fs = [['enabled','Enabled'],['failing','Failing'],['mac','Needs Mac'],['paused','Paused'],['all','All']];
+  const list = data.agents.filter(a => agentFilter==='all' ? true : agentFilter==='enabled' ? a.enabled && !a.retired : agentFilter==='paused' ? !a.enabled && !a.retired : agentFilter==='mac' ? a.needsMac && a.enabled : ['FAILED','ABANDONED'].includes(a.lastRun?.status) && a.enabled);
+  return `<div class="tiles"><div class="tile"><b>${live.length}</b>live<br><span>tasks</span></div><div class="tile"><b>${enabled.length}</b>enabled<br><span>cap 35</span></div><div class="tile"><b>${enabled.filter(a=>a.needsMac&&!a.requireDevice).length}</b>Mac unbound<br><span>Require this computer off</span></div><div class="tile"><b>${enabled.filter(a=>EXPENSIVE.has(a.model)&&isHourly(a.schedule)).length}</b>hourly opus<br><span>token burn</span></div></div>
+  <div class="filters">${fs.map(([k,l])=>`<button class="${agentFilter===k?'on':''}" onclick="agentFilter='${k}';render()">${l}</button>`).join('')}</div>
+  <div class="cards">${list.map(a=>{const [h,label]=health(a); return `<div class="card"><h3><span class="dot ${h}"></span>${esc(a.name)}</h3><div class="meta">${esc(label)} · lane <b>${esc(a.lane)}</b> · ${esc(a.schedule||'')} · ${esc(a.model||'default')}</div><div>${a.needsMac?'<span class="pill">Mac</span>':''}${a.mayMessageCustomers?'<span class="pill">messages customers</span>':''}${a.mayEditSite?'<span class="pill">edits site</span>':''}${a.mayEditAds?'<span class="pill">edits ads</span>':''}${a.mayReplyReviews?'<span class="pill">replies reviews</span>':''}${a.mayManageTasks?'<span class="pill">manages tasks</span>':''}${a.duplicateOf?'<span class="pill">duplicate</span>':''}</div>${a.riskFlags?.length?`<div class="flags ${a.enabled?'':'bad'}">${esc(a.riskFlags.join(' · '))}</div>`:''}<div class="meta">${a.id}</div></div>`}).join('')}</div>`;
 }
 function render(){
-  const live = agents.filter(a=>!a.retired);
-  const enabled = live.filter(a=>a.enabled);
-  const tiles = [
-    ['Agents', live.length, 'live tasks'], ['Enabled', enabled.length, 'cap 35'],
-    ['Failing', enabled.filter(a=>['FAILED','ABANDONED'].includes(a.lastRun?.status)).length, 'enabled, last run bad'],
-    ['Need Mac', enabled.filter(a=>a.needsMac).length, enabled.filter(a=>a.needsMac&&!a.requireDevice).length+' not bound'],
-    ['Opus', enabled.filter(a=>EXPENSIVE.has(a.model)).length, enabled.filter(a=>EXPENSIVE.has(a.model)&&isHourly(a.schedule)).length+' hourly'],
-    ['Paused loaded', live.filter(a=>!a.enabled&&a.riskFlags?.length).length, 'rule-breaking prompts'],
-  ];
-  tiles.push(['Duplicates', live.filter(a=>a.duplicateOf).length, 'declared']);
-  document.getElementById('tiles').innerHTML = tiles.map(([k,v,s])=>`<div class="tile"><b>${v}</b>${k}<br><span>${s}</span></div>`).join('');
-  const fs = [['enabled','Enabled'],['failing','Failing'],['mac','Needs Mac'],['paused','Paused'],['all','All']];
-  document.getElementById('filters').innerHTML = fs.map(([k,l])=>`<button class="${filter===k?'on':''}" onclick="filter='${k}';render()">${l}</button>`).join('');
-  const list = agents.filter(a => filter==='all' ? true : filter==='enabled' ? a.enabled && !a.retired : filter==='paused' ? !a.enabled && !a.retired : filter==='mac' ? a.needsMac && a.enabled : ['FAILED','ABANDONED'].includes(a.lastRun?.status) && a.enabled);
-  document.getElementById('cards').innerHTML = list.map(a=>{ const [h,label]=health(a); return `
-    <div class="card">
-      <h3><span class="dot ${h}"></span>${a.name}</h3>
-      <div class="meta">${label} · lane <b>${a.lane}</b> · ${a.schedule||''} · ${a.model||'default'}</div>
-      <div>${a.needsMac?'<span class="pill">Mac</span>':''}${a.mayMessageCustomers?'<span class="pill">messages customers</span>':''}${a.mayEditSite?'<span class="pill">edits site</span>':''}${a.mayEditAds?'<span class="pill">edits ads</span>':''}${a.mayReplyReviews?'<span class="pill">replies reviews</span>':''}${a.mayManageTasks?'<span class="pill">manages tasks</span>':''}${a.duplicateOf?'<span class="pill">duplicate</span>':''}</div>
-      ${a.riskFlags?.length?`<div class="flags ${a.enabled?'':'bad'}">${a.riskFlags.join(' · ')}</div>`:''}
-      <div class="meta">${a.id}</div>
-    </div>`}).join('');
-  const f = [];
-  for (const a of live) if (a.duplicateOf) f.push(`${a.name} duplicates ${a.duplicateOf}${a.enabled?' and is enabled':''}`);
-  const byLane = {}; for (const a of enabled) if (a.acts) (byLane[a.lane] ||= []).push(a.name);
-  for (const [l,n] of Object.entries(byLane)) if (n.length>1) f.push(`${n.length} enabled acting agents in lane ${l}: ${n.join(' | ')}`);
-  for (const a of enabled) if (isHourly(a.schedule)&&EXPENSIVE.has(a.model)) f.push(`${a.name} runs hourly on ${a.model}`);
-  document.getElementById('findings').innerHTML = f.map(x=>`<li>${x}</li>`).join('') || '<li>none</li>';
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on', b.dataset.v===view));
+  $('view').innerHTML = ({today:renderToday, keywords:renderKeywords, plan:renderPlan, gbp:renderGbp, agents:renderAgents})[view]();
 }
-fetch('../registry/agents.json').then(r=>r.json()).then(j=>{agents=j.agents;render();}).catch(()=>{document.getElementById('cards').textContent='Serve this folder over HTTP (npx serve ..) so the registry can load.';});
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{view=b.dataset.v;render();});
+Promise.all([
+  fetch('../registry/agents.json').then(r=>r.json()).then(j=>data.agents=j.agents),
+  fetch('../keywords/master.json').then(r=>r.json()).then(j=>data.keywords=j),
+  fetch('../plan/plan.json').then(r=>r.json()).then(j=>data.plan=j).catch(()=>null),
+]).then(render).catch(()=>{$('view').textContent='Serve the control-tower folder over HTTP (npx serve .) so the JSON files can load.';});
 </script>
 </body>
 </html>
