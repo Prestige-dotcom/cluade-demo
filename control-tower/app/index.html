@@ -6,7 +6,10 @@
 <title>Prestige Control Tower</title>
 <style>
   :root { --bg:#0f1216; --card:#171c23; --text:#e8ecf1; --muted:#95a0ad; --ok:#38b26f; --warn:#e3a72f; --bad:#e2574c; --line:#273040; --accent:#4f8cff }
-  @media (prefers-color-scheme: light) { :root { --bg:#f5f7fa; --card:#fff; --text:#141a21; --muted:#5b6673; --line:#dde3ea } }
+  :root { color-scheme: light dark }
+  @media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) { --bg:#f5f7fa; --card:#fff; --text:#141a21; --muted:#5b6673; --line:#dde3ea } }
+  :root[data-theme="light"] { --bg:#f5f7fa; --card:#fff; --text:#141a21; --muted:#5b6673; --line:#dde3ea }
+  :root[data-theme="dark"] { --bg:#0f1216; --card:#171c23; --text:#e8ecf1; --muted:#95a0ad; --line:#273040 }
   * { box-sizing:border-box }
   body { margin:0; background:var(--bg); color:var(--text); font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif; padding:16px; padding-bottom:80px }
   h1 { font-size:20px; margin:0 0 4px } .sub { color:var(--muted); margin:0 0 14px; font-size:13px }
@@ -107,10 +110,11 @@ function render(){
   $('view').innerHTML = ({today:renderToday, keywords:renderKeywords, plan:renderPlan, gbp:renderGbp, agents:renderAgents})[view]();
 }
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{view=b.dataset.v;render();});
+const load = (a,b) => fetch(a).then(r=>{ if(!r.ok) throw 0; return r.json(); }).catch(()=>fetch(b).then(r=>r.json()));
 Promise.all([
-  fetch('../registry/agents.json').then(r=>r.json()).then(j=>data.agents=j.agents),
-  fetch('../keywords/master.json').then(r=>r.json()).then(j=>data.keywords=j),
-  fetch('../plan/plan.json').then(r=>r.json()).then(j=>data.plan=j).catch(()=>null),
+  load('data/agents.json','../registry/agents.json').then(j=>data.agents=j.agents),
+  load('data/master.json','../keywords/master.json').then(j=>data.keywords=j),
+  load('data/plan.json','../plan/plan.json').then(j=>data.plan=j).catch(()=>null),
 ]).then(render).catch(()=>{$('view').textContent='Serve the control-tower folder over HTTP (npx serve .) so the JSON files can load.';});
 </script>
 </body>
