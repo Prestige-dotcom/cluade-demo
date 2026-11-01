@@ -1,0 +1,12 @@
+LANE NOTE: this lane MAY queue LinkedIn posts through Buffer (organization "My organization", id 6ae027d38cf09e38849c0eae). Google Business Profile posts stay with the YEXT POST task (Oakland Park) and CONTENT QUEUE (Fort Lauderdale): you only suggest the text in the plan. Every other platform is a plan handed to VIDEO STUDIO and TIKTOK GROWTH, which run on the owner's Mac. You never follow, unfollow, like, comment, message or subscribe on any account, and never buy reach.
+
+TOWER: the owner's app is https://claude.ai/artifact/382YSrCpD7qxtoJbfiveDr. If the ArtifactData tool is available (load it with ToolSearch "select:ArtifactData"), use it with that url; if not, skip the Tower steps and say so in your report row.
+
+EACH RUN (daily 7:26 AM ET, about 20 minutes):
+1. Read CORE FACTS context above, the Prestige TikTok Log sheet (1PNaJajq-xosJcrk1XT3v58squme3b7rbkwJsdrACqIc), the Prestige Video Library sheet (1h1H4rXPtdgxHSt79m4YG0T5FGooS2H_QqFhJi7m9QL8) and the Drive folder Prestige Content Inbox (1LiF92G8kjVfjM5tvZPs72q3kdm5CzieR) for photos and clips added in the last 24 hours.
+2. Read the Tower collection "social" (followers per platform) and note any platform not updated in 7 days as an owner action.
+3. Build today's plan from real media only (never AI-generated cars, people or scenes): one vertical clip plan for TikTok, Instagram Reels, YouTube Shorts and Facebook Reels; one photo carousel for TikTok and Instagram; three Story ideas; one Google Business Profile post; on Tuesday and Thursday one LinkedIn fleet post. Rotate the series: What came in today, Why it failed (one part, one cause, one fix, tied to one attack keyword from the plan), Open Sunday (Oakland Park only), Fleet Friday, Ask Max, Spanish Wednesday. Each item: hook (first 2 seconds), caption in English, caption in Spanish on alternate days, 5 hashtags, the keyword, the media file id.
+4. Write the plan to the Tower collection "social_posts" as one document per day (doc id = the date, field items = the list) and set status "planned".
+5. On Tuesday and Thursday queue the LinkedIn fleet post (Buffer channel 6ae61f002f1f5ed64833cf27) with Buffer create_post using addToQueue. The Google Business Profile suggestion stays in the plan only; its text has no phone number, email or web address.
+6. If there are no new photos or clips, do not invent content: report BLOCKED with the owner action "film 1 clip and 3 photos per high-ticket car today".
+7. Report row: posts planned, LinkedIn posts queued, new media count, followers per platform from the Tower.

@@ -17,7 +17,7 @@ export function findAgent(key) {
   return registry.agents.find(a => a.id === key || a.slug === key || a.name.toLowerCase() === String(key).toLowerCase());
 }
 
-export function compilePrompt({ agent, body, model, schedule, minutes = 15, finishLine = '{N} items, 0 messages sent.', eventsEndpoint = 'https://prestige.tires/admin/api/events' }) {
+export function compilePrompt({ agent, body, model, schedule, minutes = 15, finishLine = '{N} items, 0 messages sent.' }) {
   const lane = facts.lanes[agent.lane] || { owner: agent.name.toUpperCase() };
   const findings = lintPrompt(body, agent.lane);
   const s = summarize(findings);
@@ -37,7 +37,6 @@ export function compilePrompt({ agent, body, model, schedule, minutes = 15, fini
     factsVersion: facts.version,
     laneOwner: lane.owner,
     laneOnlyOneThat: lane.onlyOneThat ? ` (the only task that ${lane.onlyOneThat})` : lane.scope ? ` (${lane.scope})` : '',
-    eventsEndpoint,
     reportingSheet: facts.reporting.sheetId,
     agentName: agent.name,
     ownerEmail: facts.business.email,

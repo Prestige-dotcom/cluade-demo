@@ -38,14 +38,14 @@
 <p class="sub" id="sub">Today, Social, Fleet and Leads save to this page's database. Keywords, Plan, GBP and Agents read the bundled plan files.</p>
 <section id="view"></section>
 <nav>
-  <button data-v="today">Today</button><button data-v="social">Social</button><button data-v="fleet">Fleet</button><button data-v="leads">Leads</button><button data-v="keywords">Keywords</button><button data-v="plan">Plan</button><button data-v="gbp">GBP</button><button data-v="agents">Agents</button>
+  <button data-v="today">Today</button><button data-v="team">Team</button><button data-v="social">Social</button><button data-v="fleet">Fleet</button><button data-v="leads">Leads</button><button data-v="keywords">Keywords</button><button data-v="plan">Plan</button><button data-v="gbp">GBP</button><button data-v="agents">Agents</button>
 </nav>
 <script>
 const EXPENSIVE = new Set(['claude-opus-5-5']);
 const isHourly = s => /^\S+ \* \* \* \*/.test(s||'') || /^\S+ \d+-\d+ \* \* /.test(s||'');
 const $ = id => document.getElementById(id);
 const esc = s => String(s??'').replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-let data = { agents: [], keywords: null, plan: null }, view = 'today', agentFilter = 'enabled', kwTier = 'A', fleetFilter = 'active', leadFilter = 'open';
+let data = { agents: [], keywords: null, plan: null, org: null }, view = 'today', agentFilter = 'enabled', kwTier = 'A', fleetFilter = 'active', leadFilter = 'open';
 let db = null, canWrite = false, live = { social: [], fleet: [], leads: [], loading: true, stale: false };
 const subs = [];
 
@@ -146,6 +146,17 @@ function renderLeads(){
 async function addLead(e){ e.preventDefault(); if(!db) return false; const fd = new FormData(e.target); const body = Object.fromEntries([...fd.entries()].map(([k,v])=>[k,v.trim()])); body.receivedAt = new Date().toISOString(); body.status = 'new'; body.createdBy = 'owner'; try { await db.collection('leads').add(body); e.target.reset(); } catch(err){ alert('Could not save: '+(err.code||err.message)); } return false; }
 async function updLead(id, patch){ if(!db) return; try { await db.doc('leads/'+id).update({...patch, updatedAt:new Date().toISOString()}); } catch(err){ alert('Could not save: '+(err.code||err.message)); } }
 
+// ---------- Team (the compact) ----------
+function renderTeam(){
+  const o = data.org; if (!o) return '<p class="note">Team chart not loaded.</p>';
+  const byId = Object.fromEntries(data.agents.map(a=>[a.id,a]));
+  return `<p class="note">${esc(o.owner)}</p>
+  <div class="cards">${o.departments.map(d=>{ const ids=d.id.split(' / '); const st=ids.map(i=>byId[i]).filter(Boolean).map(a=>health(a)); const worst = st.some(x=>x[0]==='bad')?'bad':st.some(x=>x[0]==='warn')?'warn':st.length?'ok':'off';
+    return `<div class="card"><h3><span class="dot ${worst}"></span>${esc(d.dept)}</h3><div>${esc(d.function)}</div><div class="meta"><b>Owner:</b> ${esc(d.owner)}</div><div class="meta"><b>Supports:</b> ${esc(d.supports.join(' · '))}</div><div class="meta"><b>Metric:</b> ${esc(d.metric)} · <b>Screen:</b> ${esc(d.app)}</div><div class="meta">${esc(d.id)}</div></div>`;}).join('')}</div>
+  <h2>Subscriptions and accounts</h2><table><tr><th>Tool</th><th>Status</th><th>Needed</th></tr>${o.subscriptions.map(x=>`<tr><td>${esc(x.tool)}</td><td>${esc(x.status)}</td><td>${esc(x.needed)}</td></tr>`).join('')}</table>
+  <h2>Retire</h2><ul>${o.retire.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`;
+}
+
 // ---------- Static screens ----------
 function renderKeywords(){
   const kw = (data.keywords?.keywords||[]).filter(k=>k.tier===kwTier);
@@ -177,7 +188,7 @@ function render(){
   document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on', b.dataset.v===view));
   const needsDb = ['today','social','fleet','leads'].includes(view);
   const banner = needsDb && live.loading ? '<p class="note">Loading saved data…</p>' : needsDb && live.stale ? '<p class="note">Saved data could not be reached yet; what you see may be out of date.</p>' : '';
-  $('view').innerHTML = banner + ({today:renderToday, social:renderSocial, fleet:renderFleet, leads:renderLeads, keywords:renderKeywords, plan:renderPlan, gbp:renderGbp, agents:renderAgents})[view]();
+  $('view').innerHTML = banner + ({today:renderToday, team:renderTeam, social:renderSocial, fleet:renderFleet, leads:renderLeads, keywords:renderKeywords, plan:renderPlan, gbp:renderGbp, agents:renderAgents})[view]();
 }
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{view=b.dataset.v;render();});
 
@@ -186,6 +197,7 @@ Promise.all([
   load('data/agents.json','../registry/agents.json').then(j=>data.agents=j.agents).catch(()=>null),
   load('data/master.json','../keywords/master.json').then(j=>data.keywords=j).catch(()=>null),
   load('data/plan.json','../plan/plan.json').then(j=>data.plan=j).catch(()=>null),
+  load('data/org.json','../registry/org.json').then(j=>data.org=j).catch(()=>null),
 ]).then(render);
 
 (async () => {

@@ -1312,35 +1312,39 @@
       ]
     },
     {
-      "id": "planned-social-growth-commander",
+      "id": "trig_0125z4jFBJMEtSHkHArMTawD",
       "slug": "social-growth-commander",
-      "name": "SOCIAL GROWTH COMMANDER (planned)",
-      "lane": "social",
-      "schedule": "30 7 * * *",
+      "name": "SOCIAL GROWTH COMMANDER",
+      "lane": "social-growth",
+      "schedule": "CRON_TZ=America/New_York 26 7 * * *",
       "model": "claude-sonnet-5-5",
-      "enabled": false,
-      "planned": true,
+      "enabled": true,
+      "planned": false,
       "acts": true,
       "lastRun": {
         "status": "never"
       },
-      "riskFlags": [],
+      "riskFlags": [
+        "no connectors attached yet: add Buffer, Google Drive, Google Sheets in claude.ai"
+      ],
       "notes": "Daily post plan for TikTok, Instagram, YouTube Shorts, Facebook, X, LinkedIn, GBP from real footage; queues GBP/LinkedIn via Buffer; hands video to Video Studio. Never follows, likes or messages on the owner's behalf."
     },
     {
-      "id": "planned-fleet-desk-sync",
+      "id": "trig_01WR2LfXksXFoVQXbZdh7ETJ",
       "slug": "fleet-desk-sync",
-      "name": "FLEET DESK SYNC (planned job)",
-      "lane": "b2b",
-      "schedule": "15 7,13,18 * * 1-5",
+      "name": "TOWER SYNC (leads + fleet)",
+      "lane": "tower-sync",
+      "schedule": "CRON_TZ=America/New_York 13 7,13,18 * * 1-5",
       "model": "claude-haiku-5-5",
-      "enabled": false,
-      "planned": true,
+      "enabled": true,
+      "planned": false,
       "acts": false,
       "lastRun": {
         "status": "never"
       },
-      "riskFlags": [],
+      "riskFlags": [
+        "no connectors attached yet: add Google Sheets in claude.ai"
+      ],
       "notes": "Mirrors B2B Prospects, Partner Network and Leads Log rows into the Tower database and writes owner notes back; no outreach."
     }
   ]
