@@ -5,16 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Prestige Control Tower</title>
 <style>
-  :root { --bg:#0f1216; --card:#171c23; --text:#e8ecf1; --muted:#95a0ad; --ok:#38b26f; --warn:#e3a72f; --bad:#e2574c; --line:#273040; --accent:#4f8cff }
-  :root { color-scheme: light dark }
+  :root { --bg:#0f1216; --card:#171c23; --text:#e8ecf1; --muted:#95a0ad; --ok:#38b26f; --warn:#e3a72f; --bad:#e2574c; --line:#273040; --accent:#4f8cff; color-scheme: light dark }
   @media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) { --bg:#f5f7fa; --card:#fff; --text:#141a21; --muted:#5b6673; --line:#dde3ea } }
   :root[data-theme="light"] { --bg:#f5f7fa; --card:#fff; --text:#141a21; --muted:#5b6673; --line:#dde3ea }
   :root[data-theme="dark"] { --bg:#0f1216; --card:#171c23; --text:#e8ecf1; --muted:#95a0ad; --line:#273040 }
   * { box-sizing:border-box }
-  body { margin:0; background:var(--bg); color:var(--text); font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif; padding:16px; padding-bottom:80px }
-  h1 { font-size:20px; margin:0 0 4px } .sub { color:var(--muted); margin:0 0 14px; font-size:13px }
-  nav { position:fixed; bottom:0; left:0; right:0; display:flex; background:var(--card); border-top:1px solid var(--line) }
-  nav button { flex:1; background:none; border:0; color:var(--muted); padding:12px 4px; font-size:12px } nav button.on { color:var(--accent); font-weight:600 }
+  body { margin:0; background:var(--bg); color:var(--text); font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif; padding:16px; padding-bottom:84px }
+  h1 { font-size:20px; margin:0 0 4px } h2 { font-size:16px; margin:18px 0 8px } .sub { color:var(--muted); margin:0 0 14px; font-size:13px }
+  nav { position:fixed; bottom:0; left:0; right:0; display:flex; background:var(--card); border-top:1px solid var(--line); overflow-x:auto }
+  nav button { flex:1 0 auto; min-width:64px; background:none; border:0; color:var(--muted); padding:12px 6px; font-size:12px } nav button.on { color:var(--accent); font-weight:600 }
   .tiles { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px; margin-bottom:14px }
   .tile { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px } .tile b { display:block; font-size:22px } .tile span { color:var(--muted); font-size:12px }
   .filters { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px } .filters button { background:var(--card); color:var(--text); border:1px solid var(--line); border-radius:999px; padding:6px 12px; font-size:13px } .filters button.on { border-color:var(--text) }
@@ -26,96 +25,180 @@
   table { width:100%; border-collapse:collapse; font-size:13px } th,td { text-align:left; padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:top } th { color:var(--muted); font-weight:600 }
   details { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:10px 12px; margin-bottom:8px } summary { cursor:pointer; font-weight:600 }
   ul { margin:6px 0; padding-left:18px } li { margin-bottom:3px }
-  .hidden { display:none }
+  form.row { display:grid; grid-template-columns:1fr 1fr; gap:8px; background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px; margin-bottom:12px }
+  form.row input, form.row select, form.row textarea, .card select, .card input, .card textarea { width:100%; background:var(--bg); color:var(--text); border:1px solid var(--line); border-radius:8px; padding:8px; font:inherit; font-size:14px }
+  form.row textarea { grid-column:1/-1 } form.row button, .btn { background:var(--accent); color:#fff; border:0; border-radius:8px; padding:9px 14px; font-weight:600 } .btn.ghost { background:transparent; color:var(--text); border:1px solid var(--line) }
+  .actions { display:flex; gap:6px; flex-wrap:wrap } .actions a { color:var(--accent); text-decoration:none; font-size:13px; border:1px solid var(--line); border-radius:8px; padding:6px 10px }
+  .note { font-size:12px; color:var(--muted); background:var(--card); border:1px dashed var(--line); border-radius:8px; padding:8px; margin-bottom:10px }
+  .prog { height:6px; background:var(--line); border-radius:3px; overflow:hidden } .prog i { display:block; height:100%; background:var(--accent) }
 </style>
 </head>
 <body>
 <h1>Prestige Control Tower</h1>
-<p class="sub" id="sub">Static preview. Production reads the D1 tables; this reads registry/agents.json, keywords/master.json and plan/plan.json.</p>
+<p class="sub" id="sub">Today, Social, Fleet and Leads save to this page's database. Keywords, Plan, GBP and Agents read the bundled plan files.</p>
 <section id="view"></section>
 <nav>
-  <button data-v="today">Today</button><button data-v="keywords">Keywords</button><button data-v="plan">Plan</button><button data-v="gbp">GBP</button><button data-v="agents">Agents</button>
+  <button data-v="today">Today</button><button data-v="social">Social</button><button data-v="fleet">Fleet</button><button data-v="leads">Leads</button><button data-v="keywords">Keywords</button><button data-v="plan">Plan</button><button data-v="gbp">GBP</button><button data-v="agents">Agents</button>
 </nav>
 <script>
 const EXPENSIVE = new Set(['claude-opus-5-5']);
 const isHourly = s => /^\S+ \* \* \* \*/.test(s||'') || /^\S+ \d+-\d+ \* \* /.test(s||'');
-let data = { agents: [], keywords: null, plan: null }, view = 'today', agentFilter = 'enabled', kwTier = 'A';
 const $ = id => document.getElementById(id);
-function health(a){ if (a.retired) return ['off','retired']; if (!a.enabled) return ['off', a.suspended?'suspended: '+a.suspended:'paused']; const s=a.lastRun?.status; if (s==='FAILED'||s==='ABANDONED') return ['bad', s.toLowerCase()+(a.lastRun.reason?' · '+a.lastRun.reason:'')]; if (a.needsMac&&!a.requireDevice) return ['warn','needs Mac, not bound']; if (s==='never') return ['warn','never ran']; return ['ok', s?s.toLowerCase():'ok']; }
-function esc(s){ return String(s??'').replace(/[&<>]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+const esc = s => String(s??'').replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let data = { agents: [], keywords: null, plan: null }, view = 'today', agentFilter = 'enabled', kwTier = 'A', fleetFilter = 'active', leadFilter = 'open';
+let db = null, canWrite = false, live = { social: [], fleet: [], leads: [], loading: true, stale: false };
+const subs = [];
 
+function health(a){ if (a.retired) return ['off','retired']; if (!a.enabled) return ['off', a.suspended?'suspended: '+a.suspended:'paused']; const s=a.lastRun?.status; if (s==='FAILED'||s==='ABANDONED') return ['bad', s.toLowerCase()+(a.lastRun.reason?' · '+a.lastRun.reason:'')]; if (a.needsMac&&!a.requireDevice) return ['warn','needs Mac, not bound']; if (s==='never') return ['warn','never ran']; return ['ok', s?s.toLowerCase():'ok']; }
+const minsSince = iso => iso ? Math.max(0, Math.round((Date.now()-new Date(iso).getTime())/60000)) : null;
+const fmtMins = m => m==null ? '' : m<60 ? m+' min' : m<1440 ? Math.round(m/60)+' h' : Math.round(m/1440)+' d';
+
+// ---------- Today ----------
 function renderToday(){
   const a = data.agents.filter(x=>!x.retired), en = a.filter(x=>x.enabled);
-  const kw = data.keywords?.keywords||[], plan = data.plan;
+  const kw = data.keywords?.keywords||[];
+  const openLeads = live.leads.filter(l=>['new','agent_replied','owner_call'].includes(l.status));
+  const waiting = openLeads.filter(l=>!l.firstHumanReplyAt);
+  const callToday = live.fleet.filter(f=>f.callToday);
   const tiles = [
-    ['Attack keywords', kw.filter(k=>k.tier==='A').length, 'low competition, own in 90 days'],
-    ['Maps keywords', kw.filter(k=>k.tier==='B').length, 'won in GBP + LSA'],
-    ['AI prompts', data.keywords?.aiPrompts?.length||0, 'tracked weekly, 4 engines'],
-    ['Pages in plan', plan?.siteChanges?.create?.length||0, 'first live: '+(plan?.calendar?.[0]?.date||'')],
-    ['Agents enabled', en.length, 'cap 35'],
-    ['Agents failing', en.filter(x=>['FAILED','ABANDONED'].includes(x.lastRun?.status)).length, 'enabled, last run bad'],
+    ['Leads open', openLeads.length, waiting.length+' with no human reply'],
+    ['Fleet calls today', callToday.length, live.fleet.filter(f=>f.status==='account').length+' accounts won'],
+    ['Social followers', live.social.reduce((s,p)=>s+(p.followers||0),0), 'target 10,000 on one platform'],
+    ['Attack keywords', kw.filter(k=>k.tier==='A').length, 'first article Nov 3'],
+    ['Agents enabled', en.length, en.filter(x=>['FAILED','ABANDONED'].includes(x.lastRun?.status)).length+' failing'],
   ];
   const actions = [
-    ['Nov 1','Quo: finish identity verification and Renew, or pick a replacement line'],
+    ['Nov 1','Quo: identity verification and Renew, or pick a replacement line'],
     ['Nov 1','Chargeback 2626001286: upload evidence'],
-    ['Now','Call Will Elmsebli at Agero (tow-in referrals)'],
-    ['Now','OpenSEO: connect Search Console + GA4; add credits (about $15/month covers daily rank tracking on 50 keywords)'],
-    ['Now','Google: add main account as owner of Fort Lauderdale profile; report "BMW Coding & Diagnostic Services" at 930 NE 4th Ave'],
-    ['Now','Mac: Require this computer on Yelp, TikTok, Yext, Video Studio, Growth Autopilot, Review Defense, Violations Guard; one Chrome'],
+    ['Now','Agero: update the failed card for Store 48 (Oct 28 email), ask Will which shop it is; decide on the discount term before any form'],
+    ['Now','OpenSEO: connect Search Console + GA4; add about $15/month of credits'],
+    ['Now','Google: add main account as owner of the Fort Lauderdale profile; report "BMW Coding & Diagnostic Services" at 930 NE 4th Ave'],
+    ['Now','Buffer: connect Instagram, Facebook Page, TikTok, YouTube (GBP and LinkedIn are connected)'],
+    ['Now','Mac: Require this computer on Yelp, TikTok, Yext, Video Studio, Growth Autopilot, Review Defense, Violations Guard'],
     ['Tonight','Mitchell 1: export customers, vehicles, closed ROs to Content Inbox'],
-    ['This week','Shoot 20 real photos per shop; apply the GBP kit to both profiles'],
-    ['This week','Confirm or stop the oil-change prices Lead Fast Responder quotes'],
-    ['This week','Announce WordPress → static cut-over'],
+    ['Daily','Film 1 clip + 3 photos per high-ticket car; 20 minutes of real replies from the Social screen'],
+    ['This week','Apply the GBP kit to both profiles; confirm or stop the oil-change prices Lead Fast Responder quotes'],
   ];
   return `<div class="tiles">${tiles.map(([k,v,s])=>`<div class="tile"><b>${v}</b>${k}<br><span>${s}</span></div>`).join('')}</div>
-  <h2 style="font-size:16px">Owner actions</h2><table><tr><th>Due</th><th>Action</th></tr>${actions.map(([d,t])=>`<tr><td>${d}</td><td>${esc(t)}</td></tr>`).join('')}</table>`;
+  ${waiting.length?`<h2>Leads with no human reply</h2><table><tr><th>Waiting</th><th>Lead</th><th>Phone</th></tr>${waiting.map(l=>`<tr><td>${fmtMins(minsSince(l.receivedAt))}</td><td>${esc(l.name||'unknown')} · ${esc(l.vehicle||'')} · ${esc(l.request||'')}<br><span class="meta">${esc(l.source)} · ${esc(l.shop||'')}</span></td><td>${l.phone?`<a href="tel:${esc(l.phone)}">${esc(l.phone)}</a>`:'<span class="meta">'+esc(l.phoneNote||'in LSA app')+'</span>'}</td></tr>`).join('')}</table>`:''}
+  ${callToday.length?`<h2>Fleet calls today</h2><table><tr><th>Account</th><th>Phone</th><th>Opener</th></tr>${callToday.map(f=>`<tr><td><b>${esc(f.company)}</b><br><span class="meta">${esc(f.contact||'')}</span></td><td>${f.phone?`<a href="tel:${esc(f.phone)}">${esc(f.phone)}</a>`:''}</td><td class="meta">${esc(f.nextStep||'')}</td></tr>`).join('')}</table>`:''}
+  <h2>Owner actions</h2><table><tr><th>Due</th><th>Action</th></tr>${actions.map(([d,t])=>`<tr><td>${d}</td><td>${esc(t)}</td></tr>`).join('')}</table>`;
 }
+
+// ---------- Social ----------
+const PLATFORMS = ['tiktok','instagram','youtube','x','facebook','linkedin','gbp'];
+const PLABEL = { tiktok:'TikTok', instagram:'Instagram', youtube:'YouTube', x:'X', facebook:'Facebook Page', linkedin:'LinkedIn', gbp:'Google Business Profile' };
+function renderSocial(){
+  const byId = Object.fromEntries(live.social.map(p=>[p.id,p]));
+  const checklist = ['Film 1 clip + 3 photos per high-ticket car (plates blurred)', 'Publish today\'s vertical video to TikTok, Reels, Shorts, Facebook', 'Photo carousel on TikTok + Instagram', '3 Stories', 'GBP post via Buffer (no phone in text)', 'Reply to every comment and DM (within 1 hour)', 'Comment on 10 local accounts with real sentences', 'Spanish version (alternate days)', 'Log followers below'];
+  return `<p class="note">Goal: 10,000 followers on one platform unlocks the Google creator profile. Compliant growth only: no follow-for-follow, no bought followers, no auto-likes. Daily supply of real footage is the constraint.</p>
+  <div class="cards">${PLATFORMS.map(id=>{ const p = byId[id]||{id, followers:null, target:10000}; const pct = Math.min(100, Math.round(((p.followers||0)/(p.target||10000))*100));
+    return `<div class="card"><h3>${PLABEL[id]}</h3><div class="meta">${esc(p.handle||'handle not set')} · ${p.followers==null?'followers not recorded':p.followers.toLocaleString()+' followers'} · target ${(p.target||10000).toLocaleString()}</div><div class="prog"><i style="width:${pct}%"></i></div>
+    ${canWrite?`<div class="actions"><input type="number" placeholder="followers" id="f_${id}" style="max-width:120px"><input placeholder="handle or URL" id="h_${id}"><button class="btn" onclick="saveSocial('${id}')">Save</button></div>`:''}
+    <div class="meta">${p.updatedAt?'updated '+esc(p.updatedAt.slice(0,10)):''} ${p.posts7d!=null?'· '+p.posts7d+' posts last 7 days':''}</div></div>`;}).join('')}</div>
+  <h2>Daily checklist</h2><ul>${checklist.map(c=>`<li>${esc(c)}</li>`).join('')}</ul>
+  <h2>Series that grow accounts</h2><ul><li>What came in today</li><li>Why it failed (one part, one cause, one fix; maps to the 32 attack keywords)</li><li>Dealer quote vs. our diagnosis (no prices, no names)</li><li>Open Sunday</li><li>Fleet Friday</li><li>Ask Max (answer comments as videos)</li><li>Spanish Wednesday</li></ul>`;
+}
+async function saveSocial(id){
+  if (!db) return;
+  const f = Number($('f_'+id).value), h = $('h_'+id).value.trim();
+  const ref = db.doc('social/'+id); const snap = await ref.get(); const cur = snap.exists ? snap.data() : {};
+  const body = { ...cur, id, followers: isNaN(f)||!$('f_'+id).value ? (cur.followers??null) : f, handle: h || cur.handle || '', target: cur.target || 10000, updatedAt: new Date().toISOString() };
+  const hist = Array.isArray(cur.history)?cur.history.slice(-60):[]; if (body.followers!=null) hist.push({d: body.updatedAt.slice(0,10), f: body.followers}); body.history = hist;
+  try { await ref.set(body); } catch(e){ alert('Could not save: '+(e.code||e.message)); }
+}
+
+// ---------- Fleet ----------
+const FSTAT = ['researched','emailed','called','meeting','proposal','account','program','do_not_contact','lost'];
+function renderFleet(){
+  const list = live.fleet.filter(f => fleetFilter==='all' ? true : fleetFilter==='calls' ? f.callToday : fleetFilter==='programs' ? f.status==='program' : fleetFilter==='accounts' ? f.status==='account' : !['do_not_contact','lost'].includes(f.status) && f.status!=='program').sort((a,b)=>(b.callToday?1:0)-(a.callToday?1:0) || (b.fit||0)-(a.fit||0));
+  const fs = [['active','Active'],['calls','Call today'],['programs','Programs'],['accounts','Accounts'],['all','All']];
+  return `<p class="note">${live.fleet.length} accounts in the Tower. The B2B engine's full list (~385) stays in the Growth Backlog sheet until it is repointed here. Add anything by hand below; notes here are yours only.</p>
+  ${canWrite?`<form class="row" onsubmit="return addFleet(event)"><input name="company" placeholder="Company" required><input name="segment" placeholder="Segment (fleet, dealer, rental, program)"><input name="contact" placeholder="Contact name / title"><input name="phone" placeholder="Phone"><input name="email" placeholder="Email"><input name="city" placeholder="City"><select name="status">${FSTAT.map(s=>`<option>${s}</option>`).join('')}</select><input name="fit" type="number" min="1" max="5" placeholder="Fit 1-5"><textarea name="nextStep" placeholder="Next step / opener"></textarea><button class="btn">Add account</button></form>`:''}
+  <div class="filters">${fs.map(([k,l])=>`<button class="${fleetFilter===k?'on':''}" onclick="fleetFilter='${k}';render()">${l}</button>`).join('')}</div>
+  <div class="cards">${list.map(f=>`<div class="card"><h3>${f.callToday?'<span class="dot warn"></span>':''}${esc(f.company)}</h3><div class="meta">${esc(f.segment||'')} · ${esc(f.city||'')} · fit ${f.fit||'?'} · <b>${esc(f.status)}</b>${f.nextDate?' · next '+esc(f.nextDate):''}</div>
+    ${f.contact?`<div class="meta">${esc(f.contact)}</div>`:''}
+    <div class="actions">${f.phone?`<a href="tel:${esc(f.phone.replace(/[^\d+]/g,''))}">Call ${esc(f.phone)}</a>`:''}${f.email?`<a href="https://mail.google.com/mail/?authuser=prestige@prestige.tires#search/${encodeURIComponent((f.email.split('@')[1]||f.email))}" target="_blank">Gmail thread</a>`:''}${f.website?`<a href="${esc(f.website)}" target="_blank">Site</a>`:''}</div>
+    ${f.nextStep?`<div>${esc(f.nextStep)}</div>`:''}
+    ${f.decision?`<div class="flags">Owner decision: ${esc(f.decision)}</div>`:''}
+    ${canWrite?`<div class="actions"><select onchange="updFleet('${f.id}',{status:this.value})">${FSTAT.map(s=>`<option ${s===f.status?'selected':''}>${s}</option>`).join('')}</select><button class="btn ghost" onclick="updFleet('${f.id}',{callToday:${!f.callToday}})">${f.callToday?'Remove from today':'Call today'}</button></div>
+    <textarea placeholder="Your notes" onchange="updFleet('${f.id}',{ownerNotes:this.value})">${esc(f.ownerNotes||'')}</textarea>`:(f.ownerNotes?`<div class="meta">${esc(f.ownerNotes)}</div>`:'')}
+    <div class="meta">${f.source?esc(f.source):''} ${f.lastTouch?'· last touch '+esc(f.lastTouch):''}</div></div>`).join('')}</div>`;
+}
+async function addFleet(e){ e.preventDefault(); if(!db) return false; const fd = new FormData(e.target); const body = Object.fromEntries([...fd.entries()].map(([k,v])=>[k, k==='fit'? (v?Number(v):null) : v.trim()])); body.createdAt = new Date().toISOString(); body.source = 'owner'; body.callToday = false; try { await db.collection('fleet').add(body); e.target.reset(); } catch(err){ alert('Could not save: '+(err.code||err.message)); } return false; }
+async function updFleet(id, patch){ if(!db) return; try { await db.doc('fleet/'+id).update({...patch, updatedAt:new Date().toISOString()}); } catch(err){ alert('Could not save: '+(err.code||err.message)); } }
+
+// ---------- Leads ----------
+const LSTAT = ['new','agent_replied','owner_call','booked','lost','do_not_contact'];
+function renderLeads(){
+  const list = live.leads.filter(l => leadFilter==='all' ? true : leadFilter==='booked' ? l.status==='booked' : ['new','agent_replied','owner_call'].includes(l.status)).sort((a,b)=>(b.receivedAt||'').localeCompare(a.receivedAt||''));
+  const fs = [['open','Open'],['booked','Booked'],['all','All']];
+  return `<p class="note">Red timer: no human reply. Lead Fast Responder keeps writing to the Leads Log sheet until it is repointed here. Add walk-ins and phone leads by hand.</p>
+  ${canWrite?`<form class="row" onsubmit="return addLead(event)"><input name="name" placeholder="Name"><input name="phone" placeholder="Phone"><input name="vehicle" placeholder="Vehicle"><select name="source"><option>phone</option><option>walk-in</option><option>website</option><option>lsa_message</option><option>lsa_call</option><option>yelp</option><option>repairpal</option><option>surecritic</option><option>facebook_lead</option><option>email</option><option>b2b</option></select><select name="shop"><option value="oakland-park">Oakland Park</option><option value="fort-lauderdale">Fort Lauderdale</option></select><input name="email" placeholder="Email"><textarea name="request" placeholder="Request"></textarea><button class="btn">Add lead</button></form>`:''}
+  <div class="filters">${fs.map(([k,l])=>`<button class="${leadFilter===k?'on':''}" onclick="leadFilter='${k}';render()">${l}</button>`).join('')}</div>
+  <div class="cards">${list.map(l=>{ const open=['new','agent_replied','owner_call'].includes(l.status); const w = minsSince(l.receivedAt); const red = open && !l.firstHumanReplyAt && w>15;
+    return `<div class="card"><h3><span class="dot ${l.status==='booked'?'ok':red?'bad':open?'warn':'off'}"></span>${esc(l.name||'unknown')} · ${esc(l.vehicle||'')}</h3><div class="meta">${esc(l.source)} · ${esc(l.shop||'')} · received ${esc((l.receivedAt||'').replace('T',' ').slice(0,16))}${open&&w!=null?' · waiting '+fmtMins(w):''}${l.appointmentAt?' · appt '+esc(l.appointmentAt):''}</div>
+    <div>${esc(l.request||'')}</div>
+    <div class="actions">${l.phone?`<a href="tel:${esc(l.phone.replace(/[^\d+]/g,''))}">Call</a><a href="sms:${esc(l.phone.replace(/[^\d+]/g,''))}">Text</a>`:`<span class="meta">${esc(l.phoneNote||'no phone on file')}</span>`}${l.email?`<a href="mailto:${esc(l.email)}">Email</a>`:''}${l.threadUrl?`<a href="${esc(l.threadUrl)}" target="_blank">Thread</a>`:''}</div>
+    ${canWrite?`<div class="actions"><select onchange="updLead('${l.id}',{status:this.value})">${LSTAT.map(s=>`<option ${s===l.status?'selected':''}>${s}</option>`).join('')}</select>${!l.firstHumanReplyAt&&open?`<button class="btn ghost" onclick="updLead('${l.id}',{firstHumanReplyAt:new Date().toISOString()})">I replied</button>`:''}</div><textarea placeholder="Notes" onchange="updLead('${l.id}',{ownerNotes:this.value})">${esc(l.ownerNotes||'')}</textarea>`:''}
+    <div class="meta">${l.agentNote?esc(l.agentNote):''}</div></div>`;}).join('')}</div>`;
+}
+async function addLead(e){ e.preventDefault(); if(!db) return false; const fd = new FormData(e.target); const body = Object.fromEntries([...fd.entries()].map(([k,v])=>[k,v.trim()])); body.receivedAt = new Date().toISOString(); body.status = 'new'; body.createdBy = 'owner'; try { await db.collection('leads').add(body); e.target.reset(); } catch(err){ alert('Could not save: '+(err.code||err.message)); } return false; }
+async function updLead(id, patch){ if(!db) return; try { await db.doc('leads/'+id).update({...patch, updatedAt:new Date().toISOString()}); } catch(err){ alert('Could not save: '+(err.code||err.message)); } }
+
+// ---------- Static screens ----------
 function renderKeywords(){
   const kw = (data.keywords?.keywords||[]).filter(k=>k.tier===kwTier);
   const tiers = [['A','Attack (low competition)'],['B','High volume / Maps'],['C','Local']];
-  return `<div class="filters">${tiers.map(([t,l])=>`<button class="${kwTier===t?'on':''}" onclick="kwTier='${t}';render()">${l}</button>`).join('')}</div>
-  <p class="meta">${esc(data.keywords?.tiers?.[kwTier]||'')}</p>
-  <table><tr><th>Keyword</th><th>Vol/mo</th><th>KD</th><th>Comp</th><th>CPC</th><th>Arena</th><th>Target</th></tr>
-  ${kw.map(k=>`<tr><td><b>${esc(k.kw)}</b>${k.es?`<br><span class="meta">ES: ${esc(k.es)}</span>`:''}</td><td>${k.vol??'—'}</td><td>${k.kd??'—'}</td><td>${k.comp??'—'}</td><td>${k.cpc?'$'+k.cpc:'—'}</td><td><span class="pill">${k.arena}</span></td><td class="meta">${esc(k.page||k.gbp||'')}</td></tr>`).join('')}</table>
-  <h2 style="font-size:16px;margin-top:18px">AI prompts (${data.keywords?.aiPrompts?.length||0})</h2><ul>${(data.keywords?.aiPrompts||[]).map(p=>`<li>${esc(p)}</li>`).join('')}</ul>`;
+  return `<div class="filters">${tiers.map(([t,l])=>`<button class="${kwTier===t?'on':''}" onclick="kwTier='${t}';render()">${l}</button>`).join('')}</div><p class="meta">${esc(data.keywords?.tiers?.[kwTier]||'')}</p>
+  <table><tr><th>Keyword</th><th>Vol/mo</th><th>KD</th><th>Comp</th><th>CPC</th><th>Arena</th><th>Target</th></tr>${kw.map(k=>`<tr><td><b>${esc(k.kw)}</b>${k.es?`<br><span class="meta">ES: ${esc(k.es)}</span>`:''}</td><td>${k.vol??'—'}</td><td>${k.kd??'—'}</td><td>${k.comp??'—'}</td><td>${k.cpc?'$'+k.cpc:'—'}</td><td><span class="pill">${k.arena}</span></td><td class="meta">${esc(k.page||k.gbp||'')}</td></tr>`).join('')}</table>
+  <h2>AI prompts (${data.keywords?.aiPrompts?.length||0})</h2><ul>${(data.keywords?.aiPrompts||[]).map(p=>`<li>${esc(p)}</li>`).join('')}</ul>`;
 }
 function renderPlan(){
   const cal = data.plan?.calendar||[];
-  return `<p class="meta">One attack keyword per weekday from Nov 3. Each item is a page or article with schema, real media, Spanish twin, GBP service and backlink asset. Generated by scripts/build-plan.mjs.</p>
-  ${cal.map(c=>`<details><summary>${c.order}. ${c.date} · ${esc(c.keyword)} <span class="pill">${c.arena}</span></summary>
-    <div class="meta">${esc(c.url||'GBP/LSA only')}</div><p><b>${esc(c.title)}</b></p>
-    <ul><li>${esc(c.answerFirst)}</li><li>Sections: ${esc(c.sections.join('; '))}</li><li>Schema: ${esc(c.schema.join(', '))}</li><li>${esc(c.media)}</li><li>Links: ${esc(c.internalLinks.join(', '))}</li><li>${esc(c.spanish)}</li>${c.gbp?`<li>GBP: ${esc(c.gbp)}</li>`:''}${c.backlink?`<li>Backlink: ${esc(c.backlink)}</li>`:''}</ul></details>`).join('')}
-  <h2 style="font-size:16px;margin-top:18px">Backlink assets</h2>${(data.plan?.backlinks||[]).map(b=>`<details><summary>${esc(b.asset)}</summary><ul>${b.keywords.map(k=>`<li>${esc(k)}</li>`).join('')}</ul></details>`).join('')}
-  <h2 style="font-size:16px;margin-top:18px">Standing link targets</h2><ul>${(data.plan?.standingTargets||[]).map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`;
+  return `<p class="meta">One attack keyword per weekday from Nov 3. Each item is a page or article with schema, real media, Spanish twin, GBP service and backlink asset.</p>
+  ${cal.map(c=>`<details><summary>${c.order}. ${c.date} · ${esc(c.keyword)} <span class="pill">${c.arena}</span></summary><div class="meta">${esc(c.url||'GBP/LSA only')}</div><p><b>${esc(c.title)}</b></p><ul><li>${esc(c.answerFirst)}</li><li>Sections: ${esc(c.sections.join('; '))}</li><li>Schema: ${esc(c.schema.join(', '))}</li><li>${esc(c.media)}</li><li>Links: ${esc(c.internalLinks.join(', '))}</li><li>${esc(c.spanish)}</li>${c.gbp?`<li>GBP: ${esc(c.gbp)}</li>`:''}${c.backlink?`<li>Backlink: ${esc(c.backlink)}</li>`:''}</ul></details>`).join('')}
+  <h2>Backlink assets</h2>${(data.plan?.backlinks||[]).map(b=>`<details><summary>${esc(b.asset)}</summary><ul>${b.keywords.map(k=>`<li>${esc(k)}</li>`).join('')}</ul></details>`).join('')}
+  <h2>Standing link targets</h2><ul>${(data.plan?.standingTargets||[]).map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`;
 }
 function renderGbp(){
-  return (data.plan?.gbpKit||[]).map(s=>`<details open><summary>${esc(s.shop)} · ${esc(s.hours)}</summary>
-    <p class="meta">${esc(s.address)} · ${esc(s.phone)}</p>
-    <p><b>Primary:</b> ${esc(s.primaryCategory)}<br><b>Additional:</b> ${esc(s.additionalCategories.join('; '))}</p>
-    <p><b>Description</b><br>${esc(s.description)}</p>
-    <details><summary>Services (${s.services.length})</summary><ul>${s.services.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></details>
-    <details><summary>Owner Q&amp;A (${s.qa.length})</summary><ul>${s.qa.map(x=>`<li><b>${esc(x.q)}</b><br>${esc(x.a)}</li>`).join('')}</ul></details>
-    <p class="meta">Posts: ${esc(s.postThemes.join(' · '))}<br>Rule: ${esc(s.postRule)}<br>Photos: ${esc(s.photoQuota)}<br>Booking: ${esc(s.bookingLink)}<br>Review link: ${esc(s.reviewLink)}</p></details>`).join('');
+  return (data.plan?.gbpKit||[]).map(s=>`<details open><summary>${esc(s.shop)} · ${esc(s.hours)}</summary><p class="meta">${esc(s.address)} · ${esc(s.phone)}</p><p><b>Primary:</b> ${esc(s.primaryCategory)}<br><b>Additional:</b> ${esc(s.additionalCategories.join('; '))}</p><p><b>Description</b><br>${esc(s.description)}</p><details><summary>Services (${s.services.length})</summary><ul>${s.services.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></details><details><summary>Owner Q&amp;A (${s.qa.length})</summary><ul>${s.qa.map(x=>`<li><b>${esc(x.q)}</b><br>${esc(x.a)}</li>`).join('')}</ul></details><p class="meta">Posts: ${esc(s.postThemes.join(' · '))}<br>Rule: ${esc(s.postRule)}<br>Photos: ${esc(s.photoQuota)}<br>Booking: ${esc(s.bookingLink)}<br>Review link: ${esc(s.reviewLink)}</p></details>`).join('');
 }
 function renderAgents(){
-  const live = data.agents.filter(a=>!a.retired), enabled = live.filter(a=>a.enabled);
+  const live_ = data.agents.filter(a=>!a.retired), enabled = live_.filter(a=>a.enabled);
   const fs = [['enabled','Enabled'],['failing','Failing'],['mac','Needs Mac'],['paused','Paused'],['all','All']];
   const list = data.agents.filter(a => agentFilter==='all' ? true : agentFilter==='enabled' ? a.enabled && !a.retired : agentFilter==='paused' ? !a.enabled && !a.retired : agentFilter==='mac' ? a.needsMac && a.enabled : ['FAILED','ABANDONED'].includes(a.lastRun?.status) && a.enabled);
-  return `<div class="tiles"><div class="tile"><b>${live.length}</b>live<br><span>tasks</span></div><div class="tile"><b>${enabled.length}</b>enabled<br><span>cap 35</span></div><div class="tile"><b>${enabled.filter(a=>a.needsMac&&!a.requireDevice).length}</b>Mac unbound<br><span>Require this computer off</span></div><div class="tile"><b>${enabled.filter(a=>EXPENSIVE.has(a.model)&&isHourly(a.schedule)).length}</b>hourly opus<br><span>token burn</span></div></div>
+  return `<div class="tiles"><div class="tile"><b>${live_.length}</b>live<br><span>tasks</span></div><div class="tile"><b>${enabled.length}</b>enabled<br><span>cap 35</span></div><div class="tile"><b>${enabled.filter(a=>a.needsMac&&!a.requireDevice).length}</b>Mac unbound<br><span>Require this computer off</span></div><div class="tile"><b>${enabled.filter(a=>EXPENSIVE.has(a.model)&&isHourly(a.schedule)).length}</b>hourly opus<br><span>token burn</span></div></div>
   <div class="filters">${fs.map(([k,l])=>`<button class="${agentFilter===k?'on':''}" onclick="agentFilter='${k}';render()">${l}</button>`).join('')}</div>
-  <div class="cards">${list.map(a=>{const [h,label]=health(a); return `<div class="card"><h3><span class="dot ${h}"></span>${esc(a.name)}</h3><div class="meta">${esc(label)} · lane <b>${esc(a.lane)}</b> · ${esc(a.schedule||'')} · ${esc(a.model||'default')}</div><div>${a.needsMac?'<span class="pill">Mac</span>':''}${a.mayMessageCustomers?'<span class="pill">messages customers</span>':''}${a.mayEditSite?'<span class="pill">edits site</span>':''}${a.mayEditAds?'<span class="pill">edits ads</span>':''}${a.mayReplyReviews?'<span class="pill">replies reviews</span>':''}${a.mayManageTasks?'<span class="pill">manages tasks</span>':''}${a.duplicateOf?'<span class="pill">duplicate</span>':''}</div>${a.riskFlags?.length?`<div class="flags ${a.enabled?'':'bad'}">${esc(a.riskFlags.join(' · '))}</div>`:''}<div class="meta">${a.id}</div></div>`}).join('')}</div>`;
+  <div class="cards">${list.map(a=>{const [h,label]=health(a); return `<div class="card"><h3><span class="dot ${h}"></span>${esc(a.name)}</h3><div class="meta">${esc(label)} · lane <b>${esc(a.lane)}</b> · ${esc(a.schedule||'')} · ${esc(a.model||'default')}</div><div>${a.needsMac?'<span class="pill">Mac</span>':''}${a.mayMessageCustomers?'<span class="pill">messages customers</span>':''}${a.mayEditSite?'<span class="pill">edits site</span>':''}${a.mayEditAds?'<span class="pill">edits ads</span>':''}${a.mayReplyReviews?'<span class="pill">replies reviews</span>':''}${a.mayManageTasks?'<span class="pill">manages tasks</span>':''}${a.duplicateOf?'<span class="pill">duplicate</span>':''}${a.planned?'<span class="pill">planned</span>':''}</div>${a.riskFlags?.length?`<div class="flags ${a.enabled?'':'bad'}">${esc(a.riskFlags.join(' · '))}</div>`:''}<div class="meta">${a.id}</div></div>`}).join('')}</div>`;
 }
+
 function render(){
   document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on', b.dataset.v===view));
-  $('view').innerHTML = ({today:renderToday, keywords:renderKeywords, plan:renderPlan, gbp:renderGbp, agents:renderAgents})[view]();
+  const needsDb = ['today','social','fleet','leads'].includes(view);
+  const banner = needsDb && live.loading ? '<p class="note">Loading saved data…</p>' : needsDb && live.stale ? '<p class="note">Saved data could not be reached yet; what you see may be out of date.</p>' : '';
+  $('view').innerHTML = banner + ({today:renderToday, social:renderSocial, fleet:renderFleet, leads:renderLeads, keywords:renderKeywords, plan:renderPlan, gbp:renderGbp, agents:renderAgents})[view]();
 }
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{view=b.dataset.v;render();});
+
 const load = (a,b) => fetch(a).then(r=>{ if(!r.ok) throw 0; return r.json(); }).catch(()=>fetch(b).then(r=>r.json()));
 Promise.all([
-  load('data/agents.json','../registry/agents.json').then(j=>data.agents=j.agents),
-  load('data/master.json','../keywords/master.json').then(j=>data.keywords=j),
+  load('data/agents.json','../registry/agents.json').then(j=>data.agents=j.agents).catch(()=>null),
+  load('data/master.json','../keywords/master.json').then(j=>data.keywords=j).catch(()=>null),
   load('data/plan.json','../plan/plan.json').then(j=>data.plan=j).catch(()=>null),
-]).then(render).catch(()=>{$('view').textContent='Serve the control-tower folder over HTTP (npx serve .) so the JSON files can load.';});
+]).then(render);
+
+(async () => {
+  if (!window.claude || !window.claude.use) { live.loading=false; render(); return; }
+  const [d, u] = await Promise.all([claude.use('db'), claude.use('user')]);
+  db = d;
+  if (!db) { live.loading=false; render(); return; }
+  const w = u ? await u.can('data.write') : null; canWrite = w !== false;
+  const timer = setTimeout(()=>{ live.loading=false; live.stale=true; render(); }, 10000);
+  let settled = 0; const got = (snap)=>{ if (!snap.metadata.fromCache && settled<3) { settled++; if (settled===3) { clearTimeout(timer); live.loading=false; live.stale=false; } } };
+  const sub = (coll, key) => subs.push(db.collection(coll).limit(1000).onSnapshot(snap=>{ live[key] = snap.docs.filter(x=>x.exists).map(x=>({id:x.id, ...x.data()})); got(snap); render(); }, e=>{ live.loading=false; live.stale=true; if (e.code==='invalid_argument') canWrite=false; render(); }));
+  sub('social','social'); sub('fleet','fleet'); sub('leads','leads');
+})();
 </script>
 </body>
 </html>

@@ -177,3 +177,22 @@ CREATE TABLE IF NOT EXISTS content_intake (
   id INTEGER PRIMARY KEY, at TEXT, shop_id TEXT REFERENCES shops(id), kind TEXT,  -- photo|clip
   drive_file_id TEXT, used_for TEXT
 );
+
+-- Social growth and owner desks (added 2026-11-01)
+CREATE TABLE IF NOT EXISTS social_accounts (
+  platform TEXT PRIMARY KEY,         -- tiktok|instagram|youtube|x|facebook|linkedin|gbp
+  handle TEXT, url TEXT, followers INTEGER, target INTEGER DEFAULT 10000, updated_at TEXT
+);
+CREATE TABLE IF NOT EXISTS social_followers_daily ( day TEXT, platform TEXT, followers INTEGER, PRIMARY KEY (day, platform) );
+CREATE TABLE IF NOT EXISTS social_posts (
+  id INTEGER PRIMARY KEY, planned_for TEXT, platform TEXT, format TEXT,   -- video|carousel|story|post|short
+  series TEXT, keyword TEXT, hook TEXT, caption_en TEXT, caption_es TEXT, hashtags TEXT,
+  media_drive_id TEXT, status TEXT DEFAULT 'planned',   -- planned|ready|scheduled|published|skipped
+  published_url TEXT, views INTEGER, likes INTEGER, comments INTEGER, profile_visits INTEGER
+);
+CREATE TABLE IF NOT EXISTS fleet_accounts (
+  id INTEGER PRIMARY KEY, company TEXT, segment TEXT, city TEXT, website TEXT, email TEXT, phone TEXT,
+  contact TEXT, fit INTEGER, status TEXT,            -- researched|emailed|called|meeting|proposal|account|program|do_not_contact|lost
+  next_step TEXT, next_date TEXT, decision TEXT, owner_notes TEXT, call_today INTEGER DEFAULT 0,
+  source TEXT, last_touch TEXT, gmail_query TEXT, created_at TEXT, updated_at TEXT
+);
