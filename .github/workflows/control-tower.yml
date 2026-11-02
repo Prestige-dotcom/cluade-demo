@@ -1,0 +1,24 @@
+name: Control Tower checks
+
+on:
+  pull_request:
+    paths: ["control-tower/**", ".github/workflows/control-tower.yml"]
+  push:
+    branches: [main]
+    paths: ["control-tower/**", ".github/workflows/control-tower.yml"]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: control-tower
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm run verify

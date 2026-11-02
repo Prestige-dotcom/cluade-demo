@@ -1,0 +1,9 @@
+TOWER: the owner's app is https://claude.ai/artifact/382YSrCpD7qxtoJbfiveDr. Load the ArtifactData tool with ToolSearch "select:ArtifactData" and use that url for every read and write. If the tool is not available, report BLOCKED and stop.
+
+PURPOSE: keep the owner's Fleet and Leads screens current from the sheets the other agents write. You copy and update records only. You never contact anyone and never change a status the owner set by hand (any document whose field source is "owner", or that has ownerNotes or callToday set by the owner, keeps those fields).
+
+EACH RUN (weekdays 7:13 AM, 1:13 PM, 6:13 PM ET, about 10 minutes):
+1. LEADS: read the Leads Log tab of the Growth Backlog sheet (1BUuS8dzFGua9Q563AjY6gXc7HNm_6RqNASjd6RFlkEg), rows from the last 14 days. For each row, upsert one document in collection "leads" (doc id = a short slug of the Gmail thread id or, if none, of the time and source) with fields name, phone, email, vehicle, request, source, shop, receivedAt (ISO), status (map: FOLLOW-UP or replied = agent_replied, BOOKED = booked, OWNER-CALL = owner_call, CLOSED = lost), agentNote. Read the document first and pass its version on update.
+2. FLEET: read the B2B Morning Brief tab (newest row) and the B2B Prospects tab rows with status EMAILED, REPLIED, MEETING or CALL LIST, and the Partner Network tab. Upsert into collection "fleet" (doc id = slug of company name): company, segment, city, website, email, phone, contact, fit, status (researched, emailed, called, meeting, proposal, account, program), nextStep, nextDate, lastTouch, source "B2B engine". Set callToday true only for the five names on today's CALL LIST row, and only if the owner has not set callToday by hand.
+3. Never delete documents. Keep the database under 2,000 documents: skip prospects with fit score under 3.
+4. Report row: leads upserted, fleet upserted, skipped, any read errors.

@@ -1,0 +1,205 @@
+{
+  "version": "2026-11-01",
+  "owner": "Max (owner): approves money, offers, partner terms, hires; films content; makes the call list; 20 min/day social replies",
+  "departments": [
+    {
+      "dept": "Command",
+      "function": "Run the system, brief the owner, fix prompts, keep the roster under 35",
+      "owner": "MASTER AGENT (COO)",
+      "id": "trig_01DFg3TqmWn1LwrENoArQoJd",
+      "supports": [
+        "Hourly Watchdog (health only)",
+        "Nightly Audit (QA of today's changes)",
+        "Violations Guard (policy and suspension risk)"
+      ],
+      "metric": "agents failing, owner actions closed",
+      "app": "Today, Agents"
+    },
+    {
+      "dept": "Leads and sales (retail)",
+      "function": "Answer every website, LSA, Yelp, RepairPal, SureCritic and email lead within 15 minutes; follow up twice",
+      "owner": "LEAD FAST RESPONDER",
+      "id": "trig_0169rSa2gKcuoeejjDGCUrcQ",
+      "supports": [
+        "Yelp Leads & Reviews (owner's Mac)",
+        "Tower Sync (copies leads into the app)",
+        "Lead Conversion audit"
+      ],
+      "metric": "minutes to first reply, booked rate",
+      "app": "Leads"
+    },
+    {
+      "dept": "Fleet and B2B sales",
+      "function": "Research and email fleet, dealer, rental and limo accounts; partner programs; owner call list",
+      "owner": "B2B PROSPECTING ENGINE",
+      "id": "trig_01QMhVEGNt79ef96ULz9jRgv",
+      "supports": [
+        "Tower Sync (copies accounts into the app)",
+        "Owner: calls and walk-overs"
+      ],
+      "metric": "meetings, accounts opened, fleet vehicles under agreement",
+      "app": "Fleet"
+    },
+    {
+      "dept": "Search (SEO, AEO, GEO, AIO)",
+      "function": "Website pages, schema, llms.txt, the 32 attack keywords, AI-answer visibility",
+      "owner": "SEARCH EVERYWHERE CHIEF + DAILY GROWTH WORKER",
+      "id": "trig_01NcUWfMmD9MqrKG9bjQEUUq / trig_01MdZi16dEUHrVcoJNjGLHAD",
+      "supports": [
+        "Weekly growth report",
+        "Weekly Scoreboard",
+        "Backlink Builder (drafts only)"
+      ],
+      "metric": "Maps rank per shop, keywords in top 10, AI mentions",
+      "app": "Keywords, Plan"
+    },
+    {
+      "dept": "Local and Maps (GBP, listings, geotags)",
+      "function": "Both Business Profiles, citations and NAP on 60 sites, geotagged photos, Q&A",
+      "owner": "DAILY SEO & CALLS (listings) + YEXT POST (Oakland Park GBP) + CONTENT QUEUE (Fort Lauderdale GBP)",
+      "id": "trig_01Gs2hDU38BNiBbsJaP2jG8n / trig_01BND4QgeX8GuGT4BX5ceRPv / trig_01AE6sEdQ5jdt8AQUu4QWSPh",
+      "supports": [
+        "Owner applies the GBP kit"
+      ],
+      "metric": "profile calls and directions, citations correct",
+      "app": "GBP"
+    },
+    {
+      "dept": "Paid (Google Ads + LSA)",
+      "function": "Keywords, negatives, assets, LSA disputes; never budgets or bids",
+      "owner": "GROWTH AUTOPILOT",
+      "id": "trig_012eTLH51eHmAVxM9i9gMtzm",
+      "supports": [
+        "Owner approves budgets"
+      ],
+      "metric": "cost per booked job",
+      "app": "Today"
+    },
+    {
+      "dept": "Social media",
+      "function": "Daily plan for TikTok, Instagram, YouTube Shorts, Facebook, X, LinkedIn; series; 10K creator-profile goal",
+      "owner": "SOCIAL GROWTH COMMANDER (new)",
+      "id": "trig_0125z4jFBJMEtSHkHArMTawD",
+      "supports": [
+        "Video Studio (edits and publishes on the Mac)",
+        "TikTok Growth (carousels on the Mac)",
+        "Campaign Engine (photo and text posts)",
+        "News Post Ideas"
+      ],
+      "metric": "followers per platform, posts per day",
+      "app": "Social"
+    },
+    {
+      "dept": "Reputation",
+      "function": "Reply to every review, report policy-violating ones, request reviews after every job",
+      "owner": "REVIEW DEFENSE",
+      "id": "trig_012h57ZyCxsz6XkW825Hrbfg",
+      "supports": [
+        "Review Requests (drafts)",
+        "Zapier review intake"
+      ],
+      "metric": "new Google reviews per week, Yelp and RepairPal rating",
+      "app": "Today"
+    },
+    {
+      "dept": "Retention",
+      "function": "Declined work, service reminders, win-back from Mitchell 1",
+      "owner": "WIN-BACK",
+      "id": "trig_01CwwX3dyrE7dEHoiJt6bPmg",
+      "supports": [
+        "Referral & Loyalty (plans only)",
+        "Owner: nightly Mitchell 1 export"
+      ],
+      "metric": "returning customers per month",
+      "app": "Today"
+    },
+    {
+      "dept": "Intelligence",
+      "function": "Competitor moves, mentions, public repair requests",
+      "owner": "DAILY WATCH",
+      "id": "trig_017YszanD2RaFx9vyaqLmBak",
+      "supports": [
+        "Competitive Intel",
+        "Defense Monitor",
+        "Local Lead Hunter"
+      ],
+      "metric": "competitor moves logged",
+      "app": "Today"
+    },
+    {
+      "dept": "Hiring",
+      "function": "Job posts, candidate replies and interviews",
+      "owner": "HIRING AUTOPILOT",
+      "id": "trig_01DRZ8mdKro94QoS2UMvrSaW",
+      "supports": [
+        "Hiring Posts (Mac)",
+        "Meeting prep"
+      ],
+      "metric": "technicians hired",
+      "app": "Today"
+    },
+    {
+      "dept": "Money and compliance",
+      "function": "Chargebacks, subscriptions, filings, ad-account security",
+      "owner": "8 AM INBOX SCAN + LEGAL & COMPLIANCE",
+      "id": "trig_015JXDRGFY4txT9tnYDGzyHD / trig_0129HTxjWUAvHY4HZFrnqktN",
+      "supports": [
+        "Inbox Triage"
+      ],
+      "metric": "open chargebacks, deadlines met",
+      "app": "Today"
+    }
+  ],
+  "subscriptions": [
+    {
+      "tool": "OpenSEO",
+      "status": "active, 100 credits",
+      "needed": "about $15/month credits; connect Search Console + GA4"
+    },
+    {
+      "tool": "Buffer",
+      "status": "free plan, GBP + LinkedIn connected",
+      "needed": "connect Instagram, Facebook, TikTok, YouTube; paid plan for 6 channels"
+    },
+    {
+      "tool": "Quo (phones)",
+      "status": "disabled, numbers deleted Nov 15",
+      "needed": "renew or replace before Nov 1"
+    },
+    {
+      "tool": "Zapier Pro",
+      "status": "review intake live",
+      "needed": "reconnect Facebook Lead Ads"
+    },
+    {
+      "tool": "Claude plan",
+      "status": "usage cap hit Oct 28",
+      "needed": "fewer hourly opus runs or a higher cap"
+    },
+    {
+      "tool": "FlyingPress",
+      "status": "no license",
+      "needed": "moot after static-site cut-over"
+    },
+    {
+      "tool": "Semrush",
+      "status": "no API units",
+      "needed": "optional"
+    },
+    {
+      "tool": "Yext",
+      "status": "active",
+      "needed": "none"
+    },
+    {
+      "tool": "CapCut, HeyGen",
+      "status": "connected",
+      "needed": "authorize publishing in CapCut"
+    }
+  ],
+  "retire": [
+    "Campaign Engine video slot",
+    "22 paused Oct 26 agents (rename RETIRED)",
+    "Duplicate Nov 5 Ads reminders trig_01NVzGFmG3JBY94WZr6UUjCH and trig_01M6LfrXpCA9Ch8HqLtnmjC3"
+  ]
+}
